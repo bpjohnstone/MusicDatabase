@@ -1,0 +1,480 @@
+﻿@model IEnumerable<MusicalEntity>
+@using MusicDatabase.Model
+
+@{
+    ViewBag.Title = "Index";
+}
+
+@helper CreateMusicalEntityList(IEnumerable<MusicalEntity> musicalEntities)
+{
+    var count = musicalEntities.Count();
+    var index = 1;
+
+    foreach (var musicalEntity in musicalEntities.OrderBy(e => e.SortName))
+    {
+        if (index > 1)
+        {
+            if (index == count)
+            {
+                    <text> &amp; </text>
+            }
+            else
+            {
+                    <text>, </text>
+            }
+        }
+
+            @Html.Raw(CreateLink(musicalEntity))
+        index++;
+    }
+}
+
+@helper CreateLink(MusicalEntity musicalEntity, bool displaySortName = false)
+{
+    var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
+    @Html.Raw(string.Format("<a href=\"#{0}\">{1}</a>", musicalEntity.ID.ToString().Replace("-", ""), linkText));
+}
+
+<h2>Index</h2>
+
+<table class="table">
+    <tr>
+        <th>Sort Name</th>
+        <th>Name</th>
+        <th>Owned Releases</th>
+        <th>Attended Performances</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@CreateLink(item, true)</td>
+            <td>@item.Name</td>
+            <td>@item.Discography.Count</td>
+            <td>@item.Performances.Count</td>
+        </tr>
+    }
+
+</table>
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.SortName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <div id="@item.ID.ToString().Replace("-", "")"><b>@Html.DisplayFor(modelItem => item.SortName)</b></div>
+            </td>
+            <td>
+                <b>@Html.DisplayFor(modelItem => item.Name)</b>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+
+                @if (item.Performances.Count > 0)
+                {
+                    <b>Performances</b>
+                    <ul>
+                        @foreach (var performance in item.Performances.OrderBy(p => p.Event.EventDate))
+                        {
+                            if (performance.Event is SingleDayEvent)
+                            {
+                                var singleDayEvent = performance.Event as SingleDayEvent;
+
+                                <li>
+
+                                    @if (singleDayEvent.EventDate.HasValue)
+                                    {
+                                        <text>@singleDayEvent.EventDate.Value.ToString("dd/MM/yyyy") - </text>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(singleDayEvent.EventName))
+                                    {
+                                        <text>@singleDayEvent.EventName</text>
+
+                                        if (singleDayEvent is Festival)
+                                        {
+                                            <span style="font-size: 10px; color: red;"><b>[Festival]</b></span>
+                                        }
+
+                                        <text> - </text>
+                                    }
+
+                                    @if (singleDayEvent.Venue != null)
+                                    {
+                                        <text>@singleDayEvent.Venue.Name, @singleDayEvent.Venue.City</text>
+                                    }
+
+                                    @if (singleDayEvent is Concert)
+                                    {
+                                        if ((performance is Headliner) && (singleDayEvent.Lineup.Count(p => p is Headliner) > 1))
+                                        {
+                                            <text>(Co-headlining with @CreateMusicalEntityList(singleDayEvent.Lineup.Where(p => p is Headliner && p.MusicalEntity.ID != item.ID).Select(p => p.MusicalEntity)))</text>
+                                        }
+                                        else if (performance is Support)
+                                        {
+                                            <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(p => p is Headliner).Select(p => p.MusicalEntity)))</text>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if(performance is Headliner)
+                                        {
+                                            <text>(Headliner)</text>
+                                        }
+                                    }
+
+                                </li>
+                            }
+                        }
+                    </ul>
+                }
+
+                @if (item.Discography.Count > 0)
+                {
+                    <b>Releases</b>
+                    <ul>
+
+                        @foreach (var release in item.Discography.OrderBy(e => e.Position).Select(r => r.Release))
+                        {
+                            if (release != null)
+                            {
+                                <li>
+                                    @release.Title (@release.Year)
+
+                                    @switch (release.ReleaseType)
+                                    {
+                                        case ReleaseType.EP:
+                                            <b><span style="font-size: 10px;">[EP]</span></b>
+                                            break;
+                                        case ReleaseType.Single:
+                                            <b><span style="font-size: 10px;">[Single]</span></b>
+                                            break;
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(release.ReleasedBy))
+                                    {
+                                        <br />
+                                        <i><span style="font-size: 11px;">@release.ReleasedBy</span></i>
+                                    }
+
+                                    @if (release.Discographies.Count > 1)
+                                    {
+                                        <br />
+                                        <span>
+                                            Also appears in the following discographies:
+
+                                            @CreateMusicalEntityList(release.Discographies.Select(e => e.MusicalEntity).Where(e => e.ID != item.ID))
+
+                                        </span>
+                                    }
+
+                                    @if ((release.IsCompilation) || (release.IsLive) || (release.IsRemixes) || (release.IsSoundtrack))
+                                    {
+                                        <br />
+
+                                        if (release.IsCompilation)
+                                        {
+                                            <b><span style="font-size: 10px; color: grey;">[Compilation]</span></b>
+                                        }
+
+                                        if (release.IsLive)
+                                        {
+                                            <b><span style="font-size: 10px; color: grey;">[Live]</span></b>
+                                        }
+
+                                        if (release.IsRemixes)
+                                        {
+                                            <b><span style="font-size: 10px; color: grey;">[Remixes]</span></b>
+                                        }
+
+                                        if (release.IsSoundtrack)
+                                        {
+                                            <b><span style="font-size: 10px; color: grey;">[Soundtrack]</span></b>
+                                        }
+                                    }
+
+                                    @if (release.Copies.Count > 0)
+                                    {
+                                        <ul>
+
+                                            @foreach (var copy in release.Copies.OrderBy(c => (c.AcquisitionDetails != null) ? c.AcquisitionDetails.DateAdded : new DateTime(1970, 01, 01)))
+                                            {
+                                                <li>
+
+                                                    @if ((copy.AcquisitionDetails != null) && (copy.AcquisitionDetails.DateAdded.HasValue))
+                                                    {
+                                                        <b>@copy.AcquisitionDetails.DateAdded.Value.ToString("dd/MM/yyyy")</b> <span>-</span>
+                                                    }
+
+                                                    @for (int index = 0; index < copy.Elements.Count; index++)
+                                                    {
+                                                        var element = copy.Elements.OrderBy(e => e.Position).ElementAt(index);
+
+                                                        if (index > 0)
+                                                        {
+                                                            <span>+</span>
+                                                        }
+
+                                                        if (element.Count > 1)
+                                                        {
+                                                            @element.Count@element.Format.Code
+
+                                                        }
+                                                        else
+                                                        {
+                                                            @element.Format.Code
+
+                                                        }
+                                                    }
+                                                    <ul>
+
+                                                        @if (copy.IsSecondhand)
+                                                        {
+                                                            <li><b><span style="font-size: 10px; color: brown;">[Secondhand]</span></b></li>
+                                                        }
+
+                                                        @if (copy.IsRecordStoreDayItem)
+                                                        {
+                                                            <li><b><span style="font-size: 10px; color: red;">[Record Store Day Item]</span></b></li>
+                                                        }
+
+                                                        @if (copy.AcquisitionDetails is GiftDetails)
+                                                        {
+                                                            var giftDetails = copy.AcquisitionDetails as GiftDetails;
+
+                                                            <li><b><span style="font-size: 10px; color: crimson;">[Gift]</span></b></li>
+                                                            <li>
+                                                                @if (!string.IsNullOrWhiteSpace(giftDetails.Occasion))
+                                                                {
+                                                                    <span>@giftDetails.Occasion</span>
+                                                                }
+
+                                                                Gift
+
+                                                                @if (!string.IsNullOrWhiteSpace(giftDetails.From))
+                                                                {
+                                                                    <span>from @giftDetails.From</span>
+                                                                }
+
+                                                            </li>
+                                                        }
+                                                        else if (copy.AcquisitionDetails is CompetitionItemDetails)
+                                                        {
+                                                            var competitionItemDetails = copy.AcquisitionDetails as CompetitionItemDetails;
+                                                            <li><b><span style="font-size: 10px; color: crimson;">[Competition Item]</span></b></li>
+                                                            <li>Won from @competitionItemDetails.From</li>
+                                                        }
+                                                        else if (copy.AcquisitionDetails is PurchaseDetails)
+                                                        {
+                                                            var purchaseDetails = copy.AcquisitionDetails as PurchaseDetails;
+
+                                                            if (purchaseDetails is OnlinePurchase)
+                                                            {
+                                                                <li><b><span style="font-size: 10px; color: blue;">[Online Purchase]</span></b></li>
+
+                                                                if (copy.IsPledgeItem)
+                                                                {
+                                                                    <li><b><span style="font-size: 10px; color: green;">[Pledge Item]</span></b></li>
+                                                                }
+                                                            }
+                                                            else if (purchaseDetails is EventPurchase)
+                                                            {
+                                                                <li><b><span style="font-size: 10px; color: teal;">[Event Purchase]</span></b></li>
+                                                            }
+
+                                                            if (purchaseDetails.GrandTotal.HasValue)
+                                                            {
+                                                                <li>@purchaseDetails.GrandTotal.Value.ToString("c")</li>
+                                                            }
+
+                                                            if (purchaseDetails.MarkedPrice.HasValue)
+                                                            {
+                                                                <li>Marked Price: @purchaseDetails.MarkedPrice.Value.ToString("c")</li>
+                                                            }
+
+                                                            if (purchaseDetails.SalePrice.HasValue)
+                                                            {
+                                                                <li>Sale Price: @purchaseDetails.SalePrice.Value.ToString("c")</li>
+                                                            }
+
+                                                            if (purchaseDetails.Tax.HasValue)
+                                                            {
+                                                                <li>Tax: @purchaseDetails.Tax.Value.ToString("c")</li>
+                                                            }
+
+                                                            if (purchaseDetails is StorePurchase)
+                                                            {
+                                                                var storePurchase = purchaseDetails as StorePurchase;
+
+                                                                if (storePurchase.PurchaseLocation != null)
+                                                                {
+                                                                    <li>Purchased from @storePurchase.PurchaseLocation.Name</li>
+                                                                }
+                                                            }
+                                                            else if (purchaseDetails is OnlinePurchase)
+                                                            {
+                                                                var onlinePurchase = purchaseDetails as OnlinePurchase;
+
+                                                                if (onlinePurchase.Postage.HasValue)
+                                                                {
+                                                                    <li>Postage: @onlinePurchase.Postage.Value.ToString("c")</li>
+                                                                }
+
+                                                                if (onlinePurchase.Website != null)
+                                                                {
+                                                                    <li>
+                                                                        @if (copy.IsPledgeItem)
+                                                                        {
+                                                                            <span>Pledged at</span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span>Purchased from</span>
+                                                                        }
+
+                                                                        @onlinePurchase.Website.Name
+
+                                                                        @if (onlinePurchase.PurchaseDate.HasValue)
+                                                                        {
+                                                                            <span>on @onlinePurchase.PurchaseDate.Value.ToString("dd/MM/yyyy")</span>
+                                                                        }
+
+                                                                    </li>
+                                                                }
+                                                            }
+                                                            else if (purchaseDetails is EventPurchase)
+                                                            {
+                                                                var eventPurchase = purchaseDetails as EventPurchase;
+
+                                                                if (eventPurchase.Event != null)
+                                                                {
+                                                                    var concert = eventPurchase.Event as Concert;
+
+                                                                    <li>
+                                                                        Purchased at @concert.Lineup.First(l => l.Position == 1).MusicalEntity.Name show
+
+                                                                        @if (concert.Venue != null)
+                                                                        {
+                                                                            <span>at @concert.Venue.Name</span>
+                                                                        }
+
+                                                                    </li>
+                                                                }
+                                                            }
+                                                        }
+
+                                                        @if (!string.IsNullOrWhiteSpace(copy.Notes))
+                                                        {
+                                                            <li>@copy.Notes</li>
+                                                        }
+
+                                                        @if ((copy.AcquisitionDetails != null) && (!string.IsNullOrWhiteSpace(copy.AcquisitionDetails.Notes)))
+                                                        {
+                                                            <li>@copy.AcquisitionDetails.Notes</li>
+                                                        }
+
+                                                        @if ((copy.IsGiftVoucherPurchase) || (copy.IsBirthdayMoneyPurchase) || (copy.IsXmasMoneyPurchase))
+                                                        {
+                                                            <li>
+
+                                                                @if (copy.IsGiftVoucherPurchase)
+                                                                {
+                                                                    <b><span style="font-size: 10px; color: orange;">[Gift Voucher]</span></b>
+                                                                }
+
+                                                                @if (copy.IsBirthdayMoneyPurchase)
+                                                                {
+                                                                    <b><span style="font-size: 10px; color: orange;">[Birthday Money]</span></b>
+                                                                }
+
+                                                                @if (copy.IsXmasMoneyPurchase)
+                                                                {
+                                                                    <b><span style="font-size: 10px; color: orange;">[Xmas Money]</span></b>
+                                                                }
+
+                                                            </li>
+                                                        }
+
+
+
+                                                        @*@if (copy.PurchaseLocation != null)
+                                                            {
+                                                                <li>
+
+                                                                    @if (copy.PurchaseLocation is MusicDatabase.Model.Location)
+                                                                    {
+                                                                        var location = copy.PurchaseLocation as MusicDatabase.Model.Location;
+
+                                                                        if (copy.IsPledgeItem)
+                                                                        {
+                                                                            <span>Pledged on </span>
+                                                                        }
+                                                                        else if (copy.IsOnlinePurchase)
+                                                                        {
+                                                                            <span>Purchased online from </span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span>Purchased from</span>
+                                                                        }
+
+                                                                        @location.Name
+
+
+                                                                        if ((copy.IsOnlinePurchase) && (copy.PurchaseDate.HasValue))
+                                                                        {
+                                                                            <span>on @copy.PurchaseDate.Value.ToString("dd/MM/yyyy")</span>
+                                                                        }
+                                                                    }
+
+                                                                </li>
+                                                            }*@
+
+
+                                                        @if (!string.IsNullOrEmpty(copy.OldNotes))
+                                                        {
+                                                            <li><i>@copy.OldNotes</i></li>
+                                                        }
+
+                                                        @if (copy.Removed)
+                                                        {
+                                                            <li>
+                                                                <span style="color: red;">
+                                                                    <b>Removed:</b> @copy.RemovedDate.Value.ToString("dd/MM/yyyy").
+                                                                    @if (!string.IsNullOrWhiteSpace(copy.RemovalNotes))
+                                                                    {
+                                                                        <br />
+                                                                        <i>@copy.RemovalNotes</i>
+                                                                    }
+                                                                </span>
+                                                            </li>
+                                                        }
+                                                    </ul>
+
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </li>
+                            }
+                        }
+
+                    </ul>
+                }
+
+            </td>
+        </tr>
+    }
+
+</table>
