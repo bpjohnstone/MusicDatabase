@@ -1,0 +1,15 @@
+﻿@model IEnumerable<MusicDatabase.Model.Release>
+
+@{
+    ViewBag.Title = "Releases By Year";
+}
+
+<h2>Releases By Year</h2>
+
+<ul>
+    @foreach (var item in Model.OrderBy(r => r.Discographies.ElementAt(0).MusicalEntity.SortName))
+    {
+        <li>@item.Discographies.First().MusicalEntity.Name - @item.Title</li>
+
+    }
+</ul>
