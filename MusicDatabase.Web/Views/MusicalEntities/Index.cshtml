@@ -347,6 +347,28 @@
                                                                 <li><b><span style="font-size: 10px; color: teal;">[Event Purchase]</span></b></li>
                                                             }
 
+                                                            if ((copy.IsGiftVoucherPurchase) || (copy.IsBirthdayMoneyPurchase) || (copy.IsXmasMoneyPurchase))
+                                                            {
+                                                                <li>
+
+                                                                    @if (copy.IsGiftVoucherPurchase)
+                                                                    {
+                                                                        <b><span style="font-size: 10px; color: orange;">[Gift Voucher]</span></b>
+                                                                    }
+
+                                                                    @if (copy.IsBirthdayMoneyPurchase)
+                                                                    {
+                                                                        <b><span style="font-size: 10px; color: orange;">[Birthday Money]</span></b>
+                                                                    }
+
+                                                                    @if (copy.IsXmasMoneyPurchase)
+                                                                    {
+                                                                        <b><span style="font-size: 10px; color: orange;">[Xmas Money]</span></b>
+                                                                    }
+
+                                                                </li>
+                                                            }
+
                                                             if (purchaseDetails.GrandTotal.HasValue)
                                                             {
                                                                 <li>@purchaseDetails.GrandTotal.Value.ToString("c")</li>
@@ -447,64 +469,6 @@
                                                         {
                                                             <li>@copy.AcquisitionDetails.Notes</li>
                                                         }
-
-                                                        @if ((copy.IsGiftVoucherPurchase) || (copy.IsBirthdayMoneyPurchase) || (copy.IsXmasMoneyPurchase))
-                                                        {
-                                                            <li>
-
-                                                                @if (copy.IsGiftVoucherPurchase)
-                                                                {
-                                                                    <b><span style="font-size: 10px; color: orange;">[Gift Voucher]</span></b>
-                                                                }
-
-                                                                @if (copy.IsBirthdayMoneyPurchase)
-                                                                {
-                                                                    <b><span style="font-size: 10px; color: orange;">[Birthday Money]</span></b>
-                                                                }
-
-                                                                @if (copy.IsXmasMoneyPurchase)
-                                                                {
-                                                                    <b><span style="font-size: 10px; color: orange;">[Xmas Money]</span></b>
-                                                                }
-
-                                                            </li>
-                                                        }
-
-
-
-                                                        @*@if (copy.PurchaseLocation != null)
-                                                            {
-                                                                <li>
-
-                                                                    @if (copy.PurchaseLocation is MusicDatabase.Model.Location)
-                                                                    {
-                                                                        var location = copy.PurchaseLocation as MusicDatabase.Model.Location;
-
-                                                                        if (copy.IsPledgeItem)
-                                                                        {
-                                                                            <span>Pledged on </span>
-                                                                        }
-                                                                        else if (copy.IsOnlinePurchase)
-                                                                        {
-                                                                            <span>Purchased online from </span>
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            <span>Purchased from</span>
-                                                                        }
-
-                                                                        @location.Name
-
-
-                                                                        if ((copy.IsOnlinePurchase) && (copy.PurchaseDate.HasValue))
-                                                                        {
-                                                                            <span>on @copy.PurchaseDate.Value.ToString("dd/MM/yyyy")</span>
-                                                                        }
-                                                                    }
-
-                                                                </li>
-                                                            }*@
-
 
                                                         @if (!string.IsNullOrEmpty(copy.OldNotes))
                                                         {

@@ -15,185 +15,7 @@ namespace MusicDatabase.EntityFramework
     {
         protected override void Seed(MusicDbContext context)
         {
-            CreateReleaseFormats(context);
             ImportData(context);
-        }
-
-        private void CreateReleaseFormats(MusicDbContext context)
-        {
-            var formats = new List<Format> {
-                new Format("LP", "12\" Vinyl"),
-                new Format("10\"", "10\" Vinyl"),
-                new Format("7\"", "7\" Vinyl"),
-                new Format("Flexi", "Flexidisc"),
-                new Format("CD", "Compact Disc"),
-                new Format("DVD"),
-                new Format("Cass", "Cassette"),
-                new Format("D/L", "Download"),
-                new Format("D/L Card", "Download Card")
-            };
-
-            context.Set<Format>().AddRange(formats);
-            context.SaveChanges();
-        }
-
-        private Dictionary<int, MusicalEntity> ImportMusicalEntities(MusicDbContext context, DataTable artistData)
-        {
-            var musicalEntities = new Dictionary<int, MusicalEntity>();
-            var artists = new List<Artist>();
-            var musicalGroups = new List<MusicalGroup>();
-
-            foreach (DataRow row in artistData.Rows)
-            {
-                int artistID = int.Parse(row["ArtistID"].ToString());
-                string name = row["Name"].ToString();
-                string sortName = row["SortName"].ToString();
-                bool isGroup = Convert.ToBoolean(row["IsGroup"]);
-
-                if (isGroup)
-                {
-                    var musicalGroup = new MusicalGroup(name, sortName);
-                    musicalGroups.Add(musicalGroup);
-                    musicalEntities.Add(artistID, musicalGroup);
-                }
-                else
-                {
-                    var artist = new Artist(name, sortName);
-                    artists.Add(artist);
-                    musicalEntities.Add(artistID, artist);
-                }
-            }
-
-            context.Set<Artist>().AddRange(artists);
-            context.Set<MusicalGroup>().AddRange(musicalGroups);
-
-            return musicalEntities;
-        }
-
-        private List<Location> ImportLocations(MusicDbContext context, DataTable locationData)
-        {
-            var locations = new List<Location>();
-
-            foreach(DataRow row in locationData.Rows)
-            {
-                string name = row["Name"].ToString();
-                if(!string.IsNullOrWhiteSpace(name))
-                { 
-                    locations.Add(new Location(name, 
-                        row["City"].ToString(), 
-                        row["State"].ToString(), 
-                        row["Country"].ToString()));
-                }
-            }
-
-            context.Set<Location>().AddRange(locations);
-            context.SaveChanges();
-
-            return locations;
-        }
-
-        private List<Website> ImportWebsites(MusicDbContext context, DataTable websiteData)
-        {
-            var websites = new List<Website>();
-
-            foreach (DataRow row in websiteData.Rows)
-            {
-                string name = row["Name"].ToString();
-                if (!string.IsNullOrWhiteSpace(name))
-                    websites.Add(new Website(name));
-            }
-
-            context.Set<Website>().AddRange(websites);
-            context.SaveChanges();
-
-            return websites;
-        }
-
-        private List<Person> ImportPeople(MusicDbContext context, DataTable peopleData)
-        {
-            var people = new List<Person>();
-
-            foreach(DataRow row in peopleData.Rows)
-            {
-                string name = row["Name"].ToString();
-                if (!string.IsNullOrWhiteSpace(name))
-                    people.Add(new Person(name, row["Notes"].ToString()));
-            }
-
-            context.Set<Person>().AddRange(people);
-            context.SaveChanges();
-
-            return people;
-        }
-
-        private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
-            Dictionary<int, MusicalEntity> musicalEntities, List<Location> locations,
-            List<Person> people, DataTable importData) where T : SingleDayEvent, new()
-        {
-            var singleDayEvents = new List<T>();
-            var performances = new List<Performance>();
-
-            foreach(DataRow row in importData.Rows)
-            {
-                var singleDayEvent = new T();
-                singleDayEvent.EventDate = DateTime.Parse(row["Date"].ToString()); ;
-                singleDayEvent.EventName = row["Name"].ToString();
-                singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
-
-                int billPosition = 1;
-
-                // Headliners
-                string[] headliners = row["Headliners"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var headlinerName in headliners)
-                {
-                    var headliner = musicalEntities.Values.First(e => e.Name == headlinerName);
-                    var performance = new Headliner(billPosition, singleDayEvent, headliner);
-
-                    singleDayEvent.Lineup.Add(performance);
-                    headliner.Performances.Add(performance);
-
-                    billPosition++;
-                }
-
-                // Supports or Performers
-                string[] otherPerformers = row["Other Performers"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach(var performerName in otherPerformers)
-                {
-                    var otherPerformer = musicalEntities.Values.First(e => e.Name == performerName);
-                    Performance performance = null;
-
-                    if(singleDayEvent is Concert)
-                    {
-                        // Concerts have Supports...
-                        performance = new Support(billPosition, singleDayEvent, otherPerformer);
-                        billPosition++;
-                    }
-                    else
-                    {
-                        // ...while Festivals just have Performers
-                        performance = new Performer(singleDayEvent, otherPerformer);
-                    }
-
-                    singleDayEvent.Lineup.Add(performance);
-                    otherPerformer.Performances.Add(performance);                        
-                }
-                
-                // Attendees
-                string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var attendeeName in attendees)
-                {
-                    var attendee = people.First(p => p.Name == attendeeName);
-                    attendee.MusicalEvents.Add(singleDayEvent);
-                    singleDayEvent.OtherAttendees.Add(attendee);
-                }
-
-                musicalEvents.Add(singleDayEvent);
-            }
-
-            context.Set<T>().AddRange(singleDayEvents);
-            context.SaveChanges();
-
-            musicalEvents.AddRange(singleDayEvents);
         }
 
         private void ImportData(MusicDbContext context)
@@ -207,6 +29,9 @@ namespace MusicDatabase.EntityFramework
             var websiteData = new DataTable();
             var concertData = new DataTable();
             var festivalData = new DataTable();
+            
+            // Create Formats
+            CreateReleaseFormats(context);
 
             // Retrieve necessary data
             using (var sqlConnect = new MySqlConnection(ConfigurationManager.ConnectionStrings["mysql.musicdb"].ConnectionString))
@@ -231,6 +56,7 @@ namespace MusicDatabase.EntityFramework
                 sqlCommand = new MySqlCommand(
                     @"SELECT c.releaseID, c.purchaseDate, c.notes, c.formatID, 
                         c.price, c.markedPrice, c.salePrice, c.postage, c.calculateTax,
+                        c.isGiftVoucherPurchase, c.isBirthdayMoneyPurchase, c.isXmasMoneyPurchase,
                         c.purchaseLocation, c.purchaseNotes, c.copyNotes,            
                         c.isGift, c.giftNotes, 
                         c.isCompetitionItem, c.competitionItemDetails,
@@ -238,7 +64,8 @@ namespace MusicDatabase.EntityFramework
                         c.isOnlinePurchase, c.website,
                         c.includesDownloadCard, c.includesFlexidisc, c.includesCompactDiscs, c.includesDVDs, 
                         c.includesDownload, 
-                        c.isSecondhand, c.isPledgeItem, c.isRecordStoreDayItem
+                        c.isSecondhand, c.isPledgeItem, c.isRecordStoreDayItem,
+                        c.removedDate, c.removalNotes
                     FROM rvwreleasecopy c", sqlConnect);
                 sqlAdapter = new MySqlDataAdapter(sqlCommand);
                 sqlAdapter.Fill(copyData);
@@ -316,16 +143,16 @@ namespace MusicDatabase.EntityFramework
                     release.ReleaseType = releaseType;
 
                     if (Convert.ToBoolean(artistRelease["IsCompilation"]))
-                        release.Tags.Add(new Tag(Model.Constants.RELEASE_TAG_COMPILATION));
+                        release.Tags.Add(new Tag(Constants.RELEASE_TAG_COMPILATION));
 
                     if (Convert.ToBoolean(artistRelease["IsSoundtrack"]))
-                        release.Tags.Add(new Tag(Model.Constants.RELEASE_TAG_SOUNDTRACK));
+                        release.Tags.Add(new Tag(Constants.RELEASE_TAG_SOUNDTRACK));
 
                     if (Convert.ToBoolean(artistRelease["IsLiveAlbum"]))
-                        release.Tags.Add(new Tag(Model.Constants.RELEASE_TAG_LIVE));
+                        release.Tags.Add(new Tag(Constants.RELEASE_TAG_LIVE));
 
                     if (Convert.ToBoolean(artistRelease["IsRemixAlbum"]))
-                        release.Tags.Add(new Tag(Model.Constants.RELEASE_TAG_REMIXES));
+                        release.Tags.Add(new Tag(Constants.RELEASE_TAG_REMIXES));
 
                     releases.Add(release);
 
@@ -443,13 +270,23 @@ namespace MusicDatabase.EntityFramework
 
                         // Add in additional descriptive tags
                         if (Convert.ToBoolean(releaseCopy["IsPledgeItem"]))
-                            copy.Tags.Add(new Tag(Model.Constants.COPY_TAG_PLEDGE_ITEM));
+                            copy.Tags.Add(new Tag(Constants.COPY_TAG_PLEDGE_ITEM));
 
                         if (Convert.ToBoolean(releaseCopy["IsSecondhand"]))
-                            copy.Tags.Add(new Tag(Model.Constants.COPY_TAG_SECONDHAND));
+                            copy.Tags.Add(new Tag(Constants.COPY_TAG_SECONDHAND));
 
                         if (Convert.ToBoolean(releaseCopy["IsRecordStoreDayItem"]))
-                            copy.Tags.Add(new Tag(Model.Constants.COPY_TAG_RECORD_STORE_DAY_ITEM));
+                            copy.Tags.Add(new Tag(Constants.COPY_TAG_RECORD_STORE_DAY_ITEM));
+
+                        // Add in additional purchase tags
+                        if (Convert.ToBoolean(releaseCopy["isGiftVoucherPurchase"]))
+                            copy.Tags.Add(new Tag(Constants.COPY_TAG_GIFT_VOUCHER_PURCHASE));
+
+                        if (Convert.ToBoolean(releaseCopy["isBirthdayMoneyPurchase"]))
+                            copy.Tags.Add(new Tag(Constants.COPY_TAG_BIRTHDAY_MONEY_PURCHASE));
+
+                        if (Convert.ToBoolean(releaseCopy["isXmasMoneyPurchase"]))
+                            copy.Tags.Add(new Tag(Constants.COPY_TAG_XMAS_MONEY_PURCHASE));
 
                         // Add in copy elements
                         int formatID = int.Parse(releaseCopy["FormatID"].ToString());
@@ -544,13 +381,13 @@ namespace MusicDatabase.EntityFramework
 
 
                         // Finally, removal info... Hey, it has happened!
-                        //DateTime? removedDate = releaseCopy["RemovedDate"] as DateTime?;
-                        //if (removedDate.HasValue)
-                        //{
-                        //    copy.Removed = true;
-                        //    copy.RemovedDate = removedDate;
-                        //    copy.RemovalNotes = releaseCopy["RemovalNotes"].ToString();
-                        //}
+                        DateTime? removedDate = releaseCopy["RemovedDate"] as DateTime?;
+                        if (removedDate.HasValue)
+                        {
+                            copy.Removed = true;
+                            copy.RemovedDate = removedDate;
+                            copy.RemovalNotes = releaseCopy["RemovalNotes"].ToString();
+                        }
 
                         release.Copies.Add(copy);
                     }
@@ -652,6 +489,183 @@ namespace MusicDatabase.EntityFramework
             // Save everything to the database
             context.Set<Release>().AddRange(releases);
             context.SaveChanges();
+        }
+
+        private void CreateReleaseFormats(MusicDbContext context)
+        {
+            var formats = new List<Format> {
+                new Format("LP", "12\" Vinyl"),
+                new Format("10\"", "10\" Vinyl"),
+                new Format("7\"", "7\" Vinyl"),
+                new Format("Flexi", "Flexidisc"),
+                new Format("CD", "Compact Disc"),
+                new Format("DVD"),
+                new Format("Cass", "Cassette"),
+                new Format("D/L", "Download"),
+                new Format("D/L Card", "Download Card")
+            };
+
+            context.Set<Format>().AddRange(formats);
+            context.SaveChanges();
+        }
+
+        private Dictionary<int, MusicalEntity> ImportMusicalEntities(MusicDbContext context, DataTable artistData)
+        {
+            var musicalEntities = new Dictionary<int, MusicalEntity>();
+            var artists = new List<Artist>();
+            var musicalGroups = new List<MusicalGroup>();
+
+            foreach (DataRow row in artistData.Rows)
+            {
+                int artistID = int.Parse(row["ArtistID"].ToString());
+                string name = row["Name"].ToString();
+                string sortName = row["SortName"].ToString();
+                bool isGroup = Convert.ToBoolean(row["IsGroup"]);
+
+                if (isGroup)
+                {
+                    var musicalGroup = new MusicalGroup(name, sortName);
+                    musicalGroups.Add(musicalGroup);
+                    musicalEntities.Add(artistID, musicalGroup);
+                }
+                else
+                {
+                    var artist = new Artist(name, sortName);
+                    artists.Add(artist);
+                    musicalEntities.Add(artistID, artist);
+                }
+            }
+
+            context.Set<Artist>().AddRange(artists);
+            context.Set<MusicalGroup>().AddRange(musicalGroups);
+
+            return musicalEntities;
+        }
+
+        private List<Location> ImportLocations(MusicDbContext context, DataTable locationData)
+        {
+            var locations = new List<Location>();
+
+            foreach (DataRow row in locationData.Rows)
+            {
+                string name = row["Name"].ToString();
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    locations.Add(new Location(name,
+                        row["City"].ToString(),
+                        row["State"].ToString(),
+                        row["Country"].ToString()));
+                }
+            }
+
+            context.Set<Location>().AddRange(locations);
+            context.SaveChanges();
+
+            return locations;
+        }
+
+        private List<Website> ImportWebsites(MusicDbContext context, DataTable websiteData)
+        {
+            var websites = new List<Website>();
+
+            foreach (DataRow row in websiteData.Rows)
+            {
+                string name = row["Name"].ToString();
+                if (!string.IsNullOrWhiteSpace(name))
+                    websites.Add(new Website(name));
+            }
+
+            context.Set<Website>().AddRange(websites);
+            context.SaveChanges();
+
+            return websites;
+        }
+
+        private List<Person> ImportPeople(MusicDbContext context, DataTable peopleData)
+        {
+            var people = new List<Person>();
+
+            foreach (DataRow row in peopleData.Rows)
+            {
+                string name = row["Name"].ToString();
+                if (!string.IsNullOrWhiteSpace(name))
+                    people.Add(new Person(name, row["Notes"].ToString()));
+            }
+
+            context.Set<Person>().AddRange(people);
+            context.SaveChanges();
+
+            return people;
+        }
+
+        private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
+            Dictionary<int, MusicalEntity> musicalEntities, List<Location> locations,
+            List<Person> people, DataTable importData) where T : SingleDayEvent, new()
+        {
+            var singleDayEvents = new List<T>();
+            var performances = new List<Performance>();
+
+            foreach (DataRow row in importData.Rows)
+            {
+                var singleDayEvent = new T();
+                singleDayEvent.EventDate = DateTime.Parse(row["Date"].ToString()); ;
+                singleDayEvent.EventName = row["Name"].ToString();
+                singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
+
+                int billPosition = 1;
+
+                // Headliners
+                string[] headliners = row["Headliners"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var headlinerName in headliners)
+                {
+                    var headliner = musicalEntities.Values.First(e => e.Name == headlinerName);
+                    var performance = new Headliner(billPosition, singleDayEvent, headliner);
+
+                    singleDayEvent.Lineup.Add(performance);
+                    headliner.Performances.Add(performance);
+
+                    billPosition++;
+                }
+
+                // Supports or Performers
+                string[] otherPerformers = row["Other Performers"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var performerName in otherPerformers)
+                {
+                    var otherPerformer = musicalEntities.Values.First(e => e.Name == performerName);
+                    Performance performance = null;
+
+                    if (singleDayEvent is Concert)
+                    {
+                        // Concerts have Supports...
+                        performance = new Support(billPosition, singleDayEvent, otherPerformer);
+                        billPosition++;
+                    }
+                    else
+                    {
+                        // ...while Festivals just have Performers
+                        performance = new Performer(singleDayEvent, otherPerformer);
+                    }
+
+                    singleDayEvent.Lineup.Add(performance);
+                    otherPerformer.Performances.Add(performance);
+                }
+
+                // Attendees
+                string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var attendeeName in attendees)
+                {
+                    var attendee = people.First(p => p.Name == attendeeName);
+                    attendee.MusicalEvents.Add(singleDayEvent);
+                    singleDayEvent.OtherAttendees.Add(attendee);
+                }
+
+                musicalEvents.Add(singleDayEvent);
+            }
+
+            context.Set<T>().AddRange(singleDayEvents);
+            context.SaveChanges();
+
+            musicalEvents.AddRange(singleDayEvents);
         }
 
         private void AddElementToCopy(MusicDbContext context, Copy copy, int count, string formatCode, int position)
