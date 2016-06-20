@@ -10,12 +10,14 @@ namespace MusicDatabase.Model
     {
         #region Properties
         public string Name { get; set; }
+        public string Psuedonym { get; set; }
         public string Notes { get; set; }
 
         // Concerts
-        public virtual ICollection<Attendance> MusicalEvents { get; set; }
+        public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
 
         // Gifts
+        //public virtual ICollection<Copy> Gifts { get; set; }
         #endregion
 
         #region Constructors
@@ -30,7 +32,7 @@ namespace MusicDatabase.Model
             Name = name;
             Notes = notes;
 
-            MusicalEvents = new List<Attendance>();
+            MusicalEvents = new List<MusicalEvent>();
         }
         #endregion
     }

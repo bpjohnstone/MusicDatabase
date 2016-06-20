@@ -46,23 +46,10 @@ namespace MusicDatabase.Model
         #endregion
     }
 
-    public abstract class ReceivedDetails : AcquisitionDetails
+    public class GiftDetails : AcquisitionDetails
     {
         #region Properties
-        public string From { get; set; }
-        #endregion
-
-        #region Constructors
-        public ReceivedDetails()
-        {
-
-        }
-        #endregion
-    }
-
-    public class GiftDetails : ReceivedDetails
-    {
-        #region Properties
+        public virtual ICollection<Person> From { get; set; }
         public string Occasion { get; set; }
         #endregion
 
@@ -70,18 +57,24 @@ namespace MusicDatabase.Model
         public GiftDetails()
             : base()
         {
-
+            From = new List<Person>();
         }
         #endregion
     }
 
-    public class CompetitionItemDetails : ReceivedDetails
+    public class CompetitionItemDetails : AcquisitionDetails
     {
+        #region Properties
+        public string Source { get; set; }
+        #endregion
+
+        #region Constructors
         public CompetitionItemDetails()
             : base()
         {
 
         }
+        #endregion
     }
 
     public abstract class PurchaseDetails : AcquisitionDetails

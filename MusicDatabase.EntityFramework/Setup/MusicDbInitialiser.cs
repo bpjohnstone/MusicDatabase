@@ -16,7 +16,7 @@ namespace MusicDatabase.EntityFramework
         protected override void Seed(MusicDbContext context)
         {
             CreateReleaseFormats(context);
-            ImportDataFromOldDatabase(context);
+            ImportData(context);
         }
 
         private void CreateReleaseFormats(MusicDbContext context)
@@ -126,86 +126,20 @@ namespace MusicDatabase.EntityFramework
             return people;
         }
 
-        private List<Concert> ImportConcerts(MusicDbContext context, Dictionary<int, MusicalEntity> musicalEntities, 
-            List<Location> locations, List<Person> people, DataTable concertData)
+        private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
+            Dictionary<int, MusicalEntity> musicalEntities, List<Location> locations,
+            List<Person> people, DataTable importData) where T : SingleDayEvent, new()
         {
-            var concerts = new List<Concert>();
+            var singleDayEvents = new List<T>();
             var performances = new List<Performance>();
 
-            foreach (DataRow row in concertData.Rows)
+            foreach(DataRow row in importData.Rows)
             {
-                // Retrieve Date
-                DateTime date = DateTime.Parse(row["Date"].ToString());
-                
-                // Retrieve Location
-                Location venue = locations.Find(l => l.Name == row["Venue"].ToString());
+                var singleDayEvent = new T();
+                singleDayEvent.EventDate = DateTime.Parse(row["Date"].ToString()); ;
+                singleDayEvent.EventName = row["Name"].ToString();
+                singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
 
-                var concert = new Concert(date, venue);
-                int billPosition = 1;
-
-                // Headliners
-                string[] headliners = row["Headliners"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach(var headlinerName in headliners)
-                {
-                    var headliner = musicalEntities.Values.First(e => e.Name == headlinerName);
-                    var performance = new Headliner(billPosition, concert, headliner);
-
-                    concert.Lineup.Add(performance);
-                    headliner.Performances.Add(performance);
-
-                    billPosition++;
-                }
-
-                // Support
-                string[] supports = row["Supports"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach(var supportName in supports)
-                {
-                    var support = musicalEntities.Values.First(e => e.Name == supportName);
-                    var performance = new Support(billPosition, concert, support);
-
-                    concert.Lineup.Add(performance);
-                    support.Performances.Add(performance);
-
-                    billPosition++;
-                }
-
-                // Attendees
-                string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach(var attendeeName in attendees)
-                {
-                    var attendee = people.First(p => p.Name == attendeeName);
-                    var attendance = new Attendance(attendee, concert);
-
-                    attendee.MusicalEvents.Add(attendance);
-                    concert.OtherAttendees.Add(attendance);
-                }
-
-                venue.MusicalEvents.Add(concert);
-                concerts.Add(concert);
-            }
-
-            context.Set<Concert>().AddRange(concerts);
-            context.Set<Performance>().AddRange(performances);
-            context.SaveChanges();
-
-            return concerts;
-        }
-
-        private List<Festival> ImportFestivals(MusicDbContext context, Dictionary<int, MusicalEntity> musicalEntities,
-                    List<Location> locations, List<Person> people, DataTable festivalData)
-        {
-            var festivals = new List<Festival>();
-            var performances = new List<Performance>();
-
-            foreach (DataRow row in festivalData.Rows)
-            {
-                // Retrieve Date
-                DateTime date = DateTime.Parse(row["Date"].ToString());
-
-                // Retrieve Location
-                Location venue = locations.Find(l => l.Name == row["Venue"].ToString());
-
-                var festival = new Festival(date, row["Name"].ToString(), venue);
                 int billPosition = 1;
 
                 // Headliners
@@ -213,50 +147,56 @@ namespace MusicDatabase.EntityFramework
                 foreach (var headlinerName in headliners)
                 {
                     var headliner = musicalEntities.Values.First(e => e.Name == headlinerName);
-                    var performance = new Headliner(billPosition, festival, headliner);
+                    var performance = new Headliner(billPosition, singleDayEvent, headliner);
 
-                    festival.Lineup.Add(performance);
+                    singleDayEvent.Lineup.Add(performance);
                     headliner.Performances.Add(performance);
 
                     billPosition++;
                 }
 
-                // Performers
-                string[] performers = row["Performers"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var performerName in performers)
+                // Supports or Performers
+                string[] otherPerformers = row["Other Performers"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach(var performerName in otherPerformers)
                 {
-                    var performer = musicalEntities.Values.First(e => e.Name == performerName);
-                    var performance = new Performer(festival, performer);
+                    var otherPerformer = musicalEntities.Values.First(e => e.Name == performerName);
+                    Performance performance = null;
 
-                    festival.Lineup.Add(performance);
-                    performer.Performances.Add(performance);
+                    if(singleDayEvent is Concert)
+                    {
+                        // Concerts have Supports...
+                        performance = new Support(billPosition, singleDayEvent, otherPerformer);
+                        billPosition++;
+                    }
+                    else
+                    {
+                        // ...while Festivals just have Performers
+                        performance = new Performer(singleDayEvent, otherPerformer);
+                    }
+
+                    singleDayEvent.Lineup.Add(performance);
+                    otherPerformer.Performances.Add(performance);                        
                 }
-
+                
                 // Attendees
                 string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var attendeeName in attendees)
                 {
                     var attendee = people.First(p => p.Name == attendeeName);
-                    var attendance = new Attendance(attendee, festival);
-
-                    attendee.MusicalEvents.Add(attendance);
-                    festival.OtherAttendees.Add(attendance);
+                    attendee.MusicalEvents.Add(singleDayEvent);
+                    singleDayEvent.OtherAttendees.Add(attendee);
                 }
 
-                if (venue != null)
-                    venue.MusicalEvents.Add(festival);
-
-                festivals.Add(festival);
+                musicalEvents.Add(singleDayEvent);
             }
 
-            context.Set<Festival>().AddRange(festivals);
-            context.Set<Performance>().AddRange(performances);
+            context.Set<T>().AddRange(singleDayEvents);
             context.SaveChanges();
 
-            return festivals;
+            musicalEvents.AddRange(singleDayEvents);
         }
 
-        private void ImportDataFromOldDatabase(MusicDbContext context)
+        private void ImportData(MusicDbContext context)
         {
             var artistData = new DataTable();
             var releaseData = new DataTable();
@@ -332,8 +272,10 @@ namespace MusicDatabase.EntityFramework
             var locations = ImportLocations(context, locationData);
             var websites = ImportWebsites(context, websiteData);
             var people = ImportPeople(context, peopleData);
-            var concerts = ImportConcerts(context, musicalEntities, locations, people, concertData);
-            var festivals = ImportFestivals(context, musicalEntities, locations, people, festivalData);
+
+            var musicalEvents = new List<SingleDayEvent>();
+            ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities, locations, people, concertData);
+            ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities, locations, people, festivalData);            
 
             List<Release> releases = new List<Release>();
 
@@ -408,7 +350,10 @@ namespace MusicDatabase.EntityFramework
                             if (giftNotes.Length == 2)
                             {
                                 giftDetails.Occasion = giftNotes[0];
-                                giftDetails.From = giftNotes[1];
+
+                                // From
+                                foreach(var fromName in giftNotes[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                                    giftDetails.From.Add(people.First(p => p.Name == fromName));
                             }
 
                             copy.AcquisitionDetails = giftDetails;
@@ -416,7 +361,7 @@ namespace MusicDatabase.EntityFramework
                         else if (Convert.ToBoolean(releaseCopy["isCompetitionItem"]))
                         {
                             var competitionItemDetails = new CompetitionItemDetails();
-                            competitionItemDetails.From = releaseCopy["CompetitionItemDetails"].ToString();
+                            competitionItemDetails.Source = releaseCopy["CompetitionItemDetails"].ToString();
                             copy.AcquisitionDetails = competitionItemDetails;
                         }
                         else 
@@ -453,9 +398,7 @@ namespace MusicDatabase.EntityFramework
                                 var eventPurchase = new EventPurchase();
 
                                 // Find Event...
-                                var musicalEvent = concerts.Find(c => (c.EventDate == dateAdded) &&
-                                    (c.Venue == purchaseLocation) &&
-                                    (c.Lineup.Any(h => h.MusicalEntity.SortName == releaseCopy["GigHeadliner"].ToString())));
+                                var musicalEvent = musicalEvents.Find(c => (c.EventDate == dateAdded) && (c.Venue == purchaseLocation));
 
                                 if (musicalEvent != null)
                                     eventPurchase.Event = musicalEvent;

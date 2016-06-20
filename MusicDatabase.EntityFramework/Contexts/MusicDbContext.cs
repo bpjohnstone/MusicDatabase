@@ -30,21 +30,51 @@ namespace MusicDatabase.EntityFramework
             modelBuilder.Entity<MusicalGroup>();
 
             modelBuilder.Entity<DiscographyEntry>();
-            modelBuilder.Entity<Release>();
-            modelBuilder.Entity<Copy>();
+
+            modelBuilder.Entity<Release>()
+                .Map(r =>
+                {
+                    r.MapInheritedProperties();
+                    r.ToTable("Releases");
+                });
+
+            modelBuilder.Entity<Copy>()
+                .Map(c =>
+                {
+                    c.MapInheritedProperties();
+                    c.ToTable("Copies");
+                });
+
             modelBuilder.Entity<Element>();
             modelBuilder.Entity<Format>();
 
             modelBuilder.Entity<AcquisitionDetails>();
+            modelBuilder.Entity<GiftDetails>()
+                .HasMany(g => g.From)
+                .WithMany()
+                .Map(p =>
+                {
+                    p.MapLeftKey("GiftDetailsID");
+                    p.MapRightKey("PersonID");
+                    p.ToTable("GiftFrom");
+                });
 
             modelBuilder.Entity<Location>();
             modelBuilder.Entity<Website>();
 
-            modelBuilder.Entity<MusicalEvent>();
+            modelBuilder.Entity<MusicalEvent>()
+                .HasMany(e => e.OtherAttendees)
+                .WithMany(p => p.MusicalEvents)
+                .Map(a =>
+                {
+                    a.MapLeftKey("MusicalEventID");
+                    a.MapRightKey("PersonID");
+                    a.ToTable("EventAttendees");
+                });
+
             modelBuilder.Entity<Concert>();
             modelBuilder.Entity<Festival>();
             modelBuilder.Entity<Performance>();
-            modelBuilder.Entity<Attendance>();
         }
         #endregion
     }

@@ -134,6 +134,38 @@
                                         }
                                     }
 
+                                    @if(singleDayEvent.OtherAttendees.Count > 0)
+                                    {
+                                        <ul>
+                                            <li>
+                                                @Html.Raw("Other Attendees: ")
+
+                                                @{
+                                                    var index = 1;
+                                                    var count = singleDayEvent.OtherAttendees.Count;
+
+                                                    foreach (var attendee in singleDayEvent.OtherAttendees)
+                                                    {
+                                                        if (index > 1)
+                                                        {
+                                                            if (index == count)
+                                                            {
+                                                                @Html.Raw(" &amp; ");
+                                                            }
+                                                            else
+                                                            {
+                                                                @Html.Raw(", ");
+                                                            }
+                                                        }
+                                                        
+                                                        @Html.Raw(attendee.Name)
+                                                        index++;
+                                                    }
+                                                }
+
+                                            </li>
+                                        </ul>
+                                    }
                                 </li>
                             }
                         }
@@ -262,9 +294,31 @@
 
                                                                 Gift
 
-                                                                @if (!string.IsNullOrWhiteSpace(giftDetails.From))
+                                                                @if (giftDetails.From.Count > 0)
                                                                 {
-                                                                    <span>from @giftDetails.From</span>
+                                                                    <text>from </text>
+
+                                                                    var index = 1;
+                                                                    var count = giftDetails.From.Count;
+
+                                                                    foreach (var person in giftDetails.From)
+                                                                    {
+                                                                        if (index > 1)
+                                                                        {
+                                                                            if (index == count)
+                                                                            {
+                                                                                @Html.Raw(" &amp; ")
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @Html.Raw(", ")
+                                                                            }
+                                                                        }
+
+                                                                        @Html.Raw(person.Name)
+
+                                                                        index++;
+                                                                    }
                                                                 }
 
                                                             </li>
@@ -273,7 +327,7 @@
                                                         {
                                                             var competitionItemDetails = copy.AcquisitionDetails as CompetitionItemDetails;
                                                             <li><b><span style="font-size: 10px; color: crimson;">[Competition Item]</span></b></li>
-                                                            <li>Won from @competitionItemDetails.From</li>
+                                                            <li>Won from @competitionItemDetails.Source</li>
                                                         }
                                                         else if (copy.AcquisitionDetails is PurchaseDetails)
                                                         {
@@ -359,14 +413,24 @@
 
                                                                 if (eventPurchase.Event != null)
                                                                 {
-                                                                    var concert = eventPurchase.Event as Concert;
-
                                                                     <li>
-                                                                        Purchased at @concert.Lineup.First(l => l.Position == 1).MusicalEntity.Name show
 
-                                                                        @if (concert.Venue != null)
+                                                                        Purchased at 
+
+                                                                        @if(eventPurchase.Event is Concert)
                                                                         {
-                                                                            <span>at @concert.Venue.Name</span>
+                                                                            var concert = eventPurchase.Event as Concert;
+                                                                            <text>@concert.Lineup.First(l => l.Position == 1).MusicalEntity.Name show</text>
+
+                                                                        }
+                                                                        else if (eventPurchase.Event is Festival)
+                                                                        {
+                                                                            @eventPurchase.Event.EventName
+                                                                        }
+
+                                                                        @if (eventPurchase.Event.Venue != null)
+                                                                        {
+                                                                            <text> at @eventPurchase.Event.Venue.Name</text>
                                                                         }
 
                                                                     </li>

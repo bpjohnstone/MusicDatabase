@@ -16,7 +16,7 @@ namespace MusicDatabase.Model
         public string EventName { get; set; }
         public string Notes { get; set; }
 
-        public virtual ICollection<Attendance> OtherAttendees { get; set; }
+        public virtual ICollection<Person> OtherAttendees { get; set; }
         #endregion
 
         #region Constructors
@@ -38,7 +38,7 @@ namespace MusicDatabase.Model
             EventName = eventName;
             Venue = venue;
 
-            OtherAttendees = new List<Attendance>();
+            OtherAttendees = new List<Person>();
         }
         #endregion
     }

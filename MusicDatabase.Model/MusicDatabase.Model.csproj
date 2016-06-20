@@ -43,7 +43,6 @@
     <Compile Include="Constants\Constants.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Constants\Enums.cs" />
-    <Compile Include="MusicalEvents\Attendance.cs" />
     <Compile Include="MusicalEvents\MultiDayEvent.cs" />
     <Compile Include="MusicalEvents\SingleDayEvent.cs" />
     <Compile Include="Person.cs" />
