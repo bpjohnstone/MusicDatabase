@@ -17,7 +17,7 @@ namespace MusicDatabase.Model
         public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
 
         // Gifts
-        //public virtual ICollection<Copy> Gifts { get; set; }
+        public virtual ICollection<Copy> GiftsGiven { get; set; }
         #endregion
 
         #region Constructors
@@ -33,6 +33,7 @@ namespace MusicDatabase.Model
             Notes = notes;
 
             MusicalEvents = new List<MusicalEvent>();
+            GiftsGiven = new List<Copy>();
         }
         #endregion
     }

@@ -10,12 +10,10 @@ namespace MusicDatabase.Model
     {
         #region Properties
         public virtual Location Venue { get; set; }
-        //public string 
-
         public DateTime? EventDate { get; set; }
         public string EventName { get; set; }
         public string Notes { get; set; }
-
+        public virtual EventGroup EventGroup { get; set; }
         public virtual ICollection<Person> OtherAttendees { get; set; }
         #endregion
 
@@ -37,8 +35,34 @@ namespace MusicDatabase.Model
             EventDate = eventDate;
             EventName = eventName;
             Venue = venue;
-
             OtherAttendees = new List<Person>();
+        }
+        #endregion
+    }
+
+    // EventGroup are so that events can be grouped together, whether it be a festival series (Big Day Out, Splendour),
+    // or just regular events, like Even Xmas shows or Don't Look Back shows.
+    public class EventGroup : Entity
+    {
+        #region Properties
+        public string Name { get; set; }
+        public string Notes { get; set; }
+        public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
+        #endregion
+
+        #region Constructors
+        public EventGroup()
+            : this("", "")
+        {
+
+        }
+
+        public EventGroup(string name, string notes)
+        {
+            Name = name;
+            Notes = notes;
+
+            MusicalEvents = new List<MusicalEvent>();
         }
         #endregion
     }

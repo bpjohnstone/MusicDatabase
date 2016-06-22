@@ -101,8 +101,8 @@ namespace MusicDatabase.EntityFramework
             var people = ImportPeople(context, peopleData);
 
             var musicalEvents = new List<SingleDayEvent>();
-            ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities, locations, people, concertData);
-            ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities, locations, people, festivalData);            
+            ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, concertData);
+            //ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities, locations, people, festivalData);            
 
             List<Release> releases = new List<Release>();
 
@@ -180,7 +180,12 @@ namespace MusicDatabase.EntityFramework
 
                                 // From
                                 foreach(var fromName in giftNotes[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                                    giftDetails.From.Add(people.First(p => p.Name == fromName));
+                                {
+                                    var person = people.First(p => p.Name == fromName);
+
+                                    giftDetails.From.Add(person);
+                                    person.GiftsGiven.Add(copy);
+                                }
                             }
 
                             copy.AcquisitionDetails = giftDetails;
@@ -486,6 +491,13 @@ namespace MusicDatabase.EntityFramework
             splitEntity = musicalEntities.Values.First(a => a.SortName == "Manzanera, Phil");
             splitEntity.Discography.Add(new DiscographyEntry(2, splitRelease));
 
+
+            // Finally, a cheap fix to get around the "Fire! Santa Rosa, Fire!" screwing up the 
+            // SetupPerformance() code. Damn comma in their name!
+            splitEntity = musicalEntities.Values.First(g => g.SortName == "Fire! Santa Rosa Fire!");
+            splitEntity.Name = "Fire! Santa Rosa, Fire!";
+            splitEntity.SortName = "Fire! Santa Rosa, Fire!";
+
             // Save everything to the database
             context.Set<Release>().AddRange(releases);
             context.SaveChanges();
@@ -599,7 +611,7 @@ namespace MusicDatabase.EntityFramework
         }
 
         private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
-            Dictionary<int, MusicalEntity> musicalEntities, List<Location> locations,
+            List<MusicalEntity> musicalEntities, List<Location> locations,
             List<Person> people, DataTable importData) where T : SingleDayEvent, new()
         {
             var singleDayEvents = new List<T>();
@@ -609,46 +621,18 @@ namespace MusicDatabase.EntityFramework
             {
                 var singleDayEvent = new T();
                 singleDayEvent.EventDate = DateTime.Parse(row["Date"].ToString()); ;
-                singleDayEvent.EventName = row["Name"].ToString();
+                singleDayEvent.EventName = row["Event Name"].ToString();
                 singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
-
-                int billPosition = 1;
+                singleDayEvent.Notes = row["Show Notes"].ToString();
 
                 // Headliners
-                string[] headliners = row["Headliners"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var headlinerName in headliners)
-                {
-                    var headliner = musicalEntities.Values.First(e => e.Name == headlinerName);
-                    var performance = new Headliner(billPosition, singleDayEvent, headliner);
-
-                    singleDayEvent.Lineup.Add(performance);
-                    headliner.Performances.Add(performance);
-
-                    billPosition++;
-                }
+                SetupPerformances<Headliner>(singleDayEvent, row["Headliners"].ToString(), musicalEntities);
 
                 // Supports or Performers
-                string[] otherPerformers = row["Other Performers"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var performerName in otherPerformers)
-                {
-                    var otherPerformer = musicalEntities.Values.First(e => e.Name == performerName);
-                    Performance performance = null;
-
-                    if (singleDayEvent is Concert)
-                    {
-                        // Concerts have Supports...
-                        performance = new Support(billPosition, singleDayEvent, otherPerformer);
-                        billPosition++;
-                    }
-                    else
-                    {
-                        // ...while Festivals just have Performers
-                        performance = new Performer(singleDayEvent, otherPerformer);
-                    }
-
-                    singleDayEvent.Lineup.Add(performance);
-                    otherPerformer.Performances.Add(performance);
-                }
+                if (singleDayEvent is Concert)
+                    SetupPerformances<Support>(singleDayEvent, row["Other Performers"].ToString(), musicalEntities);
+                else
+                    SetupPerformances<Performance>(singleDayEvent, row["OtherPerformers"].ToString(), musicalEntities);
 
                 // Attendees
                 string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -666,6 +650,41 @@ namespace MusicDatabase.EntityFramework
             context.SaveChanges();
 
             musicalEvents.AddRange(singleDayEvents);
+        }
+
+        private void SetupPerformances<T>(SingleDayEvent singleDayEvent, string performanceData, List<MusicalEntity> musicalEntities) where T : Performance, new()
+        {
+            string[] performances = performanceData.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var performanceDetails in performances)
+            {
+                // Find out if there is a 'Performing as...'
+                string performingAs = string.Empty;
+                string[] parts = performanceDetails.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Count() > 1)
+                    performingAs = parts[1];
+
+                // Check to see if there are more than one artist performing in this particular performance....
+                string[] performerNames = parts[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                // Create the performance
+                var performance = new T();
+
+                if ((performance is Headliner) || (performance is Support))
+                    performance.Position = singleDayEvent.Lineup.Count + 1;
+
+                performance.Event = singleDayEvent;
+                performance.PerformingAs = performingAs;
+
+                // Add in the performers
+                foreach (var performerName in performerNames)
+                {
+                    var performer = musicalEntities.First(e => e.Name == performerName);
+                    performance.Performers.Add(new Performer(performance.Performers.Count + 1, performer));
+                    performer.Performances.Add(performance);
+                }
+
+                singleDayEvent.Lineup.Add(performance);
+            }
         }
 
         private void AddElementToCopy(MusicDbContext context, Copy copy, int count, string formatCode, int position)

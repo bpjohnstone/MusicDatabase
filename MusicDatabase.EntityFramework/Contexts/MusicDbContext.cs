@@ -23,9 +23,26 @@ namespace MusicDatabase.EntityFramework
             // Convention added in, so automatically generated Foreign Keys are in the form <Entity>ID
             modelBuilder.Conventions.Add(new ForeignKeyNamingConvention());
 
-            modelBuilder.Entity<Person>();
+            modelBuilder.Entity<Person>()
+                .HasMany(c => c.GiftsGiven)
+                .WithMany()
+                .Map(g =>
+                {
+                    g.MapLeftKey("PersonID");
+                    g.MapRightKey("CopyID");
+                    g.ToTable("GiftsGiven");
+                });
 
-            modelBuilder.Entity<MusicalEntity>();
+            modelBuilder.Entity<MusicalEntity>()
+                .HasMany(e => e.Performances)
+                .WithMany()
+                .Map(e => 
+                {
+                    e.MapLeftKey("MusicalEntityID");
+                    e.MapRightKey("PerformanceID");
+                    e.ToTable("MusicalEntityPerformances");
+                });
+
             modelBuilder.Entity<Artist>();
             modelBuilder.Entity<MusicalGroup>();
 
@@ -75,6 +92,7 @@ namespace MusicDatabase.EntityFramework
             modelBuilder.Entity<Concert>();
             modelBuilder.Entity<Festival>();
             modelBuilder.Entity<Performance>();
+            modelBuilder.Entity<Performer>();
         }
         #endregion
     }

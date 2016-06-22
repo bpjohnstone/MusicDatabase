@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.Model
 {
-    public abstract class Performance
+    public class Performance
     {
         #region Properties
         public Guid ID { get; set; }
         public int? Position { get; set; }
-        public virtual MusicalEntity MusicalEntity { get; set; }
+
+        public virtual ICollection<Performer> Performers { get; set; }
         public string PerformingAs { get; set; }
+
         public virtual MusicalEvent Event { get; set; }
         public string Notes { get; set; }
         #endregion
@@ -28,7 +30,11 @@ namespace MusicDatabase.Model
         {
             ID = Guid.NewGuid();
             Position = position;
-            MusicalEntity = musicalEntity;
+            Performers = new List<Performer>();
+
+            if (musicalEntity != null)
+                Performers.Add(new Performer(Performers.Count() + 1, musicalEntity));
+
             Event = musicalEvent;
         }
         #endregion
@@ -62,17 +68,27 @@ namespace MusicDatabase.Model
         }
     }
 
-    public class Performer : Performance
+    public class Performer
     {
+        #region Properties
+        public Guid ID { get; set; }
+        public int Position { get; set; }
+        public MusicalEntity MusicalEntity { get; set; }
+        #endregion
+
+        #region Constructors
         public Performer()
+            : this(1, null)
         {
 
         }
 
-        public Performer(MusicalEvent musicalEvent, MusicalEntity musicalEntity)
-            : base(null, musicalEvent, musicalEntity)
+        public Performer(int position, MusicalEntity musicalEntity)
         {
-
+            ID = Guid.NewGuid();
+            Position = position;
+            MusicalEntity = musicalEntity;
         }
+        #endregion
     }
 }

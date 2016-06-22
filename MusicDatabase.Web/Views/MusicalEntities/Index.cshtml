@@ -117,13 +117,31 @@
 
                                     @if (singleDayEvent is Concert)
                                     {
-                                        if ((performance is Headliner) && (singleDayEvent.Lineup.Count(p => p is Headliner) > 1))
+                                        if (performance is Headliner)
                                         {
-                                            <text>(Co-headlining with @CreateMusicalEntityList(singleDayEvent.Lineup.Where(p => p is Headliner && p.MusicalEntity.ID != item.ID).Select(p => p.MusicalEntity)))</text>
+                                            if (performance.Performers.Count > 1)
+                                            {
+                                                <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
+                                            }
+
+                                            if (!string.IsNullOrWhiteSpace(performance.PerformingAs))
+                                            {
+                                                <text>(Performing as @performance.PerformingAs)</text>
+                                            }
+
+                                            if(singleDayEvent.Lineup.Count(p => p is Headliner) > 1)
+                                            {
+                                                <text>(Co-headlining with @CreateMusicalEntityList(singleDayEvent.Lineup.Where(p => p is Headliner && p.ID != performance.ID).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>
+                                            }
                                         }
-                                        else if (performance is Support)
+                                        else if(performance is Support)
                                         {
-                                            <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(p => p is Headliner).Select(p => p.MusicalEntity)))</text>
+                                            if(performance.Performers.Count > 1)
+                                            {
+                                                <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
+                                            }
+                                            
+                                            <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>                                                                                       
                                         }
                                     }
                                     else
@@ -138,7 +156,7 @@
                                     {
                                         <ul>
                                             <li>
-                                                @Html.Raw("Other Attendees: ")
+                                                @Html.Raw("Attended with: ")
 
                                                 @{
                                                     var index = 1;
@@ -442,7 +460,7 @@
                                                                         @if(eventPurchase.Event is Concert)
                                                                         {
                                                                             var concert = eventPurchase.Event as Concert;
-                                                                            <text>@concert.Lineup.First(l => l.Position == 1).MusicalEntity.Name show</text>
+                                                                            <text>@concert.Lineup.First(l => l.Position == 1).Performers.First().MusicalEntity.Name show</text>
 
                                                                         }
                                                                         else if (eventPurchase.Event is Festival)
