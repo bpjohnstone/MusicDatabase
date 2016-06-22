@@ -89,8 +89,10 @@ namespace MusicDatabase.EntityFramework
                     a.ToTable("EventAttendees");
                 });
 
+            modelBuilder.Entity<EventGroup>();
             modelBuilder.Entity<Concert>();
             modelBuilder.Entity<Festival>();
+
             modelBuilder.Entity<Performance>();
             modelBuilder.Entity<Performer>();
         }

@@ -61,7 +61,6 @@ namespace MusicDatabase.Model
         {
             Name = name;
             Notes = notes;
-
             MusicalEvents = new List<MusicalEvent>();
         }
         #endregion

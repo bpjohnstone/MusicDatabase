@@ -102,7 +102,7 @@ namespace MusicDatabase.EntityFramework
 
             var musicalEvents = new List<SingleDayEvent>();
             ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, concertData);
-            //ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities, locations, people, festivalData);            
+            ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, festivalData);            
 
             List<Release> releases = new List<Release>();
 
@@ -495,8 +495,7 @@ namespace MusicDatabase.EntityFramework
             // Finally, a cheap fix to get around the "Fire! Santa Rosa, Fire!" screwing up the 
             // SetupPerformance() code. Damn comma in their name!
             splitEntity = musicalEntities.Values.First(g => g.SortName == "Fire! Santa Rosa Fire!");
-            splitEntity.Name = "Fire! Santa Rosa, Fire!";
-            splitEntity.SortName = "Fire! Santa Rosa, Fire!";
+            splitEntity.Name = splitEntity.SortName = "Fire! Santa Rosa, Fire!";
 
             // Save everything to the database
             context.Set<Release>().AddRange(releases);
@@ -601,7 +600,11 @@ namespace MusicDatabase.EntityFramework
             {
                 string name = row["Name"].ToString();
                 if (!string.IsNullOrWhiteSpace(name))
-                    people.Add(new Person(name, row["Notes"].ToString()));
+                {
+                    var person = new Person(name, row["Notes"].ToString());
+                    person.Psuedonym = row["Psuedonym"].ToString();
+                    people.Add(person);
+                }
             }
 
             context.Set<Person>().AddRange(people);
@@ -610,12 +613,29 @@ namespace MusicDatabase.EntityFramework
             return people;
         }
 
+        private List<EventGroup> ImportEventGroups(MusicDbContext context, DataTable importData)
+        {
+            var eventGroups = new List<EventGroup>();
+            var groupData = importData.DefaultView.ToTable(true, "Event Group");
+
+            foreach(DataRow row in groupData.Rows)
+            {
+                if (!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
+                    eventGroups.Add(new EventGroup(row["Event Group"].ToString(), string.Empty));
+            }
+
+            context.Set<EventGroup>().AddRange(eventGroups);
+            context.SaveChanges();
+
+            return eventGroups;
+        }
+
         private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
             List<MusicalEntity> musicalEntities, List<Location> locations,
             List<Person> people, DataTable importData) where T : SingleDayEvent, new()
         {
             var singleDayEvents = new List<T>();
-            var performances = new List<Performance>();
+            var eventGroups = ImportEventGroups(context, importData);
 
             foreach (DataRow row in importData.Rows)
             {
@@ -625,6 +645,10 @@ namespace MusicDatabase.EntityFramework
                 singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
                 singleDayEvent.Notes = row["Show Notes"].ToString();
 
+                // Event Group
+                if(!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
+                    singleDayEvent.EventGroup = eventGroups.Find(g => g.Name == row["Event Group"].ToString());
+
                 // Headliners
                 SetupPerformances<Headliner>(singleDayEvent, row["Headliners"].ToString(), musicalEntities);
 
@@ -632,7 +656,7 @@ namespace MusicDatabase.EntityFramework
                 if (singleDayEvent is Concert)
                     SetupPerformances<Support>(singleDayEvent, row["Other Performers"].ToString(), musicalEntities);
                 else
-                    SetupPerformances<Performance>(singleDayEvent, row["OtherPerformers"].ToString(), musicalEntities);
+                    SetupPerformances<Performance>(singleDayEvent, row["Other Performers"].ToString(), musicalEntities);
 
                 // Attendees
                 string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -643,13 +667,12 @@ namespace MusicDatabase.EntityFramework
                     singleDayEvent.OtherAttendees.Add(attendee);
                 }
 
+                singleDayEvents.Add(singleDayEvent);
                 musicalEvents.Add(singleDayEvent);
             }
 
             context.Set<T>().AddRange(singleDayEvents);
             context.SaveChanges();
-
-            musicalEvents.AddRange(singleDayEvents);
         }
 
         private void SetupPerformances<T>(SingleDayEvent singleDayEvent, string performanceData, List<MusicalEntity> musicalEntities) where T : Performance, new()

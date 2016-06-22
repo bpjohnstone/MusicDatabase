@@ -98,9 +98,9 @@
                                         <text>@singleDayEvent.EventDate.Value.ToString("dd/MM/yyyy") - </text>
                                     }
 
-                                    @if (!string.IsNullOrWhiteSpace(singleDayEvent.EventName))
+                                    @if(singleDayEvent.EventGroup != null)
                                     {
-                                        <text>@singleDayEvent.EventName</text>
+                                        <text>@singleDayEvent.EventGroup.Name </text>
 
                                         if (singleDayEvent is Festival)
                                         {
@@ -108,6 +108,11 @@
                                         }
 
                                         <text> - </text>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(singleDayEvent.EventName))
+                                    {
+                                        <text>@singleDayEvent.EventName - </text>
                                     }
 
                                     @if (singleDayEvent.Venue != null)
@@ -140,8 +145,15 @@
                                             {
                                                 <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
                                             }
-                                            
-                                            <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>                                                                                       
+
+                                            if(singleDayEvent.Lineup.Count(l => l is Headliner) > 0)
+                                            {
+                                                <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>
+                                            }
+                                            else
+                                            {
+                                                <text>(Support)</text>
+                                            }
                                         }
                                     }
                                     else
@@ -149,6 +161,13 @@
                                         if(performance is Headliner)
                                         {
                                             <text>(Headliner)</text>
+                                        }
+                                        else
+                                        {
+                                            if(performance.Performers.Count > 1)
+                                            {
+                                                <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
+                                            }
                                         }
                                     }
 
