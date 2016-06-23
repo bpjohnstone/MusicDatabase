@@ -16,11 +16,11 @@
         {
             if (index == count)
             {
-                    <text> &amp; </text>
+                    @Html.Raw(" &amp; ");
             }
             else
             {
-                    <text>, </text>
+                    @Html.Raw(", ");
             }
         }
 
@@ -148,7 +148,7 @@
 
                                             if(singleDayEvent.Lineup.Count(l => l is Headliner) > 0)
                                             {
-                                                <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>
+                                                <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
                                             }
                                             else
                                             {

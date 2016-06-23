@@ -691,10 +691,7 @@ namespace MusicDatabase.EntityFramework
 
                 // Create the performance
                 var performance = new T();
-
-                if ((performance is Headliner) || (performance is Support))
-                    performance.Position = singleDayEvent.Lineup.Count + 1;
-
+                performance.Position = singleDayEvent.Lineup.Count + 1;
                 performance.Event = singleDayEvent;
                 performance.PerformingAs = performingAs;
 

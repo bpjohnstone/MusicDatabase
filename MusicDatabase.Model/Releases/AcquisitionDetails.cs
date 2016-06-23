@@ -20,8 +20,7 @@ namespace MusicDatabase.Model
     // - Stuff won in a competition (CompetitionItemDetails)
 
     // To that effect, there's a whole bunch of classes in this file to implement this kind of structure / detail.
-    // Each of the classes adds a bit more properties, with the exception of the CompetitionItemDetails,
-    // which is just implemented in name only.
+    // Each of the classes adds a bit more properties
 
     // Of course, this whole thing is pretty ridiculous
 
