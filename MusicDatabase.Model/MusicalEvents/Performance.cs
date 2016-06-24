@@ -19,10 +19,6 @@ namespace MusicDatabase.Model
     // There is currently no checking enforced on this, but as a standard, Concerts have Headliners and Supports, 
     // while Festivals have Headliners and Performances.
 
-    // At this point in time, only peformances that I saw are included in the Lineup (So, if I missed a Support 
-    // or had to leave before the Headliner, then they aren't included in the Lineup). If need be, it shouldn't be
-    // too difficult to include all Performances, but add a "Did Not See" boolean or something.
-
     // The PerformingAs property covers when MusicalEntities will go under different names
     // For example, Devin Townsend performing as "Devin Townsend Project" or Something for Kate doing secret shows
     // under alternate names, like "George Kaplan and the Editors" or "Jerry and the Manmade Sharks".
@@ -37,6 +33,10 @@ namespace MusicDatabase.Model
     // to include references back to the contributing Entities, with the goal of including the collaborative 
     // Releases and Performances in each's own Discography and Performance lists. (Marked appropriately, of course).
 
+    // Finally, the Attended property (defaulting to true) indicates whether this performance was actually attended
+    // There have been times where Headliners have been missed (like missing Motor Ace's final show because of 
+    // needing to catch a train back to Geelong), or the bazillion Support acts that I've skipped over the years. 
+    // (The latter, however, generally don't get included in the Lineup collection)
 
     public class Performance
     {
@@ -49,6 +49,8 @@ namespace MusicDatabase.Model
 
         public virtual MusicalEvent Event { get; set; }
         public string Notes { get; set; }
+
+        public bool Attended { get; set; }
         #endregion
 
         #region Constructors
@@ -68,6 +70,7 @@ namespace MusicDatabase.Model
                 Performers.Add(new Performer(Performers.Count() + 1, musicalEntity));
 
             Event = musicalEvent;
+            Attended = true;        // By default, it's assumed that the performance was seen
         }
         #endregion
     }

@@ -29,7 +29,7 @@ namespace MusicDatabase.EntityFramework
             var websiteData = new DataTable();
             var concertData = new DataTable();
             var festivalData = new DataTable();
-            
+
             // Create Formats
             CreateReleaseFormats(context);
 
@@ -102,7 +102,7 @@ namespace MusicDatabase.EntityFramework
 
             var musicalEvents = new List<SingleDayEvent>();
             ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, concertData);
-            ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, festivalData);            
+            ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, festivalData);
 
             List<Release> releases = new List<Release>();
 
@@ -179,7 +179,7 @@ namespace MusicDatabase.EntityFramework
                                 giftDetails.Occasion = giftNotes[0];
 
                                 // From
-                                foreach(var fromName in giftNotes[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                                foreach (var fromName in giftNotes[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                                 {
                                     var person = people.First(p => p.Name == fromName);
 
@@ -196,7 +196,7 @@ namespace MusicDatabase.EntityFramework
                             competitionItemDetails.Source = releaseCopy["CompetitionItemDetails"].ToString();
                             copy.AcquisitionDetails = competitionItemDetails;
                         }
-                        else 
+                        else
                         {
                             PurchaseDetails purchaseDetails = null;
                             var purchaseLocation = locations.Find(l => l.Name == releaseCopy["PurchaseLocation"].ToString());
@@ -251,7 +251,7 @@ namespace MusicDatabase.EntityFramework
 
                             if (releaseCopy["MarkedPrice"] != DBNull.Value)
                                 purchaseDetails.MarkedPrice = decimal.Parse(releaseCopy["MarkedPrice"].ToString());
-                            
+
                             if (releaseCopy["SalePrice"] != DBNull.Value)
                                 purchaseDetails.SalePrice = decimal.Parse(releaseCopy["SalePrice"].ToString());
 
@@ -269,7 +269,7 @@ namespace MusicDatabase.EntityFramework
 
                             copy.AcquisitionDetails = purchaseDetails;
                         }
-                        
+
                         copy.AcquisitionDetails.DateAdded = dateAdded;
                         copy.AcquisitionDetails.Notes = releaseCopy["PurchaseNotes"].ToString().Trim();
 
@@ -618,7 +618,7 @@ namespace MusicDatabase.EntityFramework
             var eventGroups = new List<EventGroup>();
             var groupData = importData.DefaultView.ToTable(true, "Event Group");
 
-            foreach(DataRow row in groupData.Rows)
+            foreach (DataRow row in groupData.Rows)
             {
                 if (!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
                     eventGroups.Add(new EventGroup(row["Event Group"].ToString(), string.Empty));
@@ -646,7 +646,7 @@ namespace MusicDatabase.EntityFramework
                 singleDayEvent.Notes = row["Show Notes"].ToString();
 
                 // Event Group
-                if(!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
+                if (!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
                     singleDayEvent.EventGroup = eventGroups.Find(g => g.Name == row["Event Group"].ToString());
 
                 // Headliners
@@ -677,23 +677,51 @@ namespace MusicDatabase.EntityFramework
 
         private void SetupPerformances<T>(SingleDayEvent singleDayEvent, string performanceData, List<MusicalEntity> musicalEntities) where T : Performance, new()
         {
+            // Imported Performances are stored in a list of MusicalEntity Names (not SortNames), delimited by a semi colon
+            // For example: You Am I;Something for Kate;British India, sees a lineup with You Am I, Something for Kate and
+            // British India all playing sets
+
+            // Within each Performance, there are a bunch of extra options:
+
+            // If MusicalEntity or MusicalEntities are performing under a different name, it will appear at the end, separated by a Pipe 
+            // e.g. Something for Kate|George Kaplan and the Editors (Something for Kate peforming as "George Kaplan and the Editors")
+
+            // If multiple MusicEntities are performing together, these are included in the performance, separated by a comma
+            // e.g. You Am I,Paul Dempsey,Adalita|You Am I All-Stars. (In this case You Am I, Paul Dempsey and Adalita
+            // performing together as the "You Am I All-Stars")
+
+            // Finally, if the performance was not seen, but still needs to be listed (i.e. in the case of missing a Headliner),
+            // this denoted by a [x] at the end of Performance: Motor Ace[x]
+
+            // This could probably be done by Regular Expressions, but a simple series of string manipulations will
+            // do for now
+
             string[] performances = performanceData.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var performanceDetails in performances)
             {
-                // Find out if there is a 'Performing as...'
-                string performingAs = string.Empty;
-                string[] parts = performanceDetails.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Count() > 1)
-                    performingAs = parts[1];
-
-                // Check to see if there are more than one artist performing in this particular performance....
-                string[] performerNames = parts[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string details = performanceDetails;
 
                 // Create the performance
                 var performance = new T();
                 performance.Position = singleDayEvent.Lineup.Count + 1;
                 performance.Event = singleDayEvent;
-                performance.PerformingAs = performingAs;
+
+                // Check to see if this peformance was missed
+                if (details.EndsWith("[x]"))
+                {
+                    performance.Attended = false;
+
+                    // Remove the "[x]" off the end of the string
+                    details = details.Substring(0, details.Length - 3);
+                }
+
+                // Find out if there is a 'Performing as...'
+                string[] parts = details.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Count() > 1)
+                    performance.PerformingAs = parts[1];
+
+                // Check to see if there are more than one artist performing in this particular performance....
+                string[] performerNames = parts[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // Add in the performers
                 foreach (var performerName in performerNames)
