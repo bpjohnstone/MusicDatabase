@@ -11,16 +11,32 @@ namespace MusicDatabase.Model
         #region Properties
         public string Name { get; set; }
 
+        public string FullName
+        {
+            get
+            {
+                if (LocationGroup != null)
+                    return string.Format("{0} - {1}", LocationGroup.Name, Name);
+                else
+                    return Name;
+            }
+        }
+
         public string City { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
         public string Address { get; set; }
 
+        // Location Group
+        public virtual LocationGroup LocationGroup { get; set; }
+
         // Collection of Concerts / Festivals
         public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
 
+        // Previous Names
+
         public string Notes { get; set; }
-      
+
         public bool Closed { get; set; }
         #endregion
 
@@ -34,7 +50,7 @@ namespace MusicDatabase.Model
         public Location(string name)
             : this(name, "", "", "")
         {
-            
+
         }
 
         public Location(string name, string city, string state, string country)

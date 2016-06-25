@@ -43,9 +43,11 @@
     <Compile Include="Constants\Constants.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Constants\Enums.cs" />
+    <Compile Include="MusicalEvents\EventGroup.cs" />
     <Compile Include="MusicalEvents\MultiDayEvent.cs" />
     <Compile Include="MusicalEvents\SingleDayEvent.cs" />
     <Compile Include="Person.cs" />
+    <Compile Include="PurchaseLocations\LocationGroup.cs" />
     <Compile Include="PurchaseLocations\Website.cs" />
     <Compile Include="MusicalEvents\MusicalEvent.cs" />
     <Compile Include="PurchaseLocations\Location.cs" />
@@ -60,6 +62,7 @@
     <Compile Include="Releases\Format.cs" />
     <Compile Include="Releases\AcquisitionDetails.cs" />
     <Compile Include="Releases\Release.cs" />
+    <Compile Include="Utilities\AbstractGroup.cs" />
     <Compile Include="Utilities\Tag.cs" />
     <Compile Include="Utilities\TaggedEntity.cs" />
   </ItemGroup>

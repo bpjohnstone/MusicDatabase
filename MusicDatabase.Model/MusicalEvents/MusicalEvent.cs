@@ -39,30 +39,4 @@ namespace MusicDatabase.Model
         }
         #endregion
     }
-
-    // EventGroup are so that events can be grouped together, whether it be a festival series (Big Day Out, Splendour),
-    // or just regular events, like Even Xmas shows or Don't Look Back shows.
-    public class EventGroup : Entity
-    {
-        #region Properties
-        public string Name { get; set; }
-        public string Notes { get; set; }
-        public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
-        #endregion
-
-        #region Constructors
-        public EventGroup()
-            : this("", "")
-        {
-
-        }
-
-        public EventGroup(string name, string notes)
-        {
-            Name = name;
-            Notes = notes;
-            MusicalEvents = new List<MusicalEvent>();
-        }
-        #endregion
-    }
 }

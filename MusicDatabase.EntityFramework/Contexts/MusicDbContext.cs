@@ -77,6 +77,7 @@ namespace MusicDatabase.EntityFramework
                 });
 
             modelBuilder.Entity<Location>();
+            modelBuilder.Entity<LocationGroup>();
             modelBuilder.Entity<Website>();
 
             modelBuilder.Entity<MusicalEvent>()

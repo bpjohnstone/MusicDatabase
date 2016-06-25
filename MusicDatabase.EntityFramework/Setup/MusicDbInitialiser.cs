@@ -241,7 +241,7 @@ namespace MusicDatabase.EntityFramework
                             {
                                 // By default, all copies are store purchases...
                                 var storePurchase = new StorePurchase();
-                                storePurchase.PurchaseLocation = locations.Find(l => l.Name == releaseCopy["PurchaseLocation"].ToString());
+                                storePurchase.PurchaseLocation = locations.Find(l => l.FullName == releaseCopy["PurchaseLocation"].ToString());
                                 purchaseDetails = storePurchase;
                             }
 
@@ -556,16 +556,30 @@ namespace MusicDatabase.EntityFramework
         private List<Location> ImportLocations(MusicDbContext context, DataTable locationData)
         {
             var locations = new List<Location>();
+            var locationGroups = ImportGroups<LocationGroup>(context, locationData);
 
             foreach (DataRow row in locationData.Rows)
             {
                 string name = row["Name"].ToString();
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    locations.Add(new Location(name,
+                    var location = new Location(name,
                         row["City"].ToString(),
                         row["State"].ToString(),
-                        row["Country"].ToString()));
+                        row["Country"].ToString());
+
+                    // Group
+                    if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
+                    {
+                        var locationGroup = locationGroups.Find(g => g.Name == row["Group"].ToString());
+                        if(locationGroup != null)
+                        {
+                            location.LocationGroup = locationGroup;
+                            locationGroup.Locations.Add(location);
+                        }
+                    }
+
+                    locations.Add(location);
                 }
             }
 
@@ -613,21 +627,25 @@ namespace MusicDatabase.EntityFramework
             return people;
         }
 
-        private List<EventGroup> ImportEventGroups(MusicDbContext context, DataTable importData)
+        private List<T> ImportGroups<T>(MusicDbContext context, DataTable importData) where T : AbstractGroup, new()
         {
-            var eventGroups = new List<EventGroup>();
-            var groupData = importData.DefaultView.ToTable(true, "Event Group");
+            var groups = new List<T>();
+            var groupData = importData.DefaultView.ToTable(true, "Group");
 
             foreach (DataRow row in groupData.Rows)
             {
-                if (!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
-                    eventGroups.Add(new EventGroup(row["Event Group"].ToString(), string.Empty));
+                if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
+                {
+                    var group = new T();
+                    group.Name = row["Group"].ToString();
+                    groups.Add(group);
+                }
             }
 
-            context.Set<EventGroup>().AddRange(eventGroups);
+            context.Set<T>().AddRange(groups);
             context.SaveChanges();
 
-            return eventGroups;
+            return groups;
         }
 
         private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
@@ -635,7 +653,7 @@ namespace MusicDatabase.EntityFramework
             List<Person> people, DataTable importData) where T : SingleDayEvent, new()
         {
             var singleDayEvents = new List<T>();
-            var eventGroups = ImportEventGroups(context, importData);
+            var eventGroups = ImportGroups<EventGroup>(context, importData);
 
             foreach (DataRow row in importData.Rows)
             {
@@ -645,9 +663,9 @@ namespace MusicDatabase.EntityFramework
                 singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
                 singleDayEvent.Notes = row["Show Notes"].ToString();
 
-                // Event Group
-                if (!string.IsNullOrWhiteSpace(row["Event Group"].ToString()))
-                    singleDayEvent.EventGroup = eventGroups.Find(g => g.Name == row["Event Group"].ToString());
+                // Group
+                if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
+                    singleDayEvent.EventGroup = eventGroups.Find(g => g.Name == row["Group"].ToString());
 
                 // Headliners
                 SetupPerformances<Headliner>(singleDayEvent, row["Headliners"].ToString(), musicalEntities);
