@@ -117,7 +117,16 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
                                     @if (singleDayEvent.Venue != null)
                                     {
-                                        <text>@singleDayEvent.Venue.Name, @singleDayEvent.Venue.City</text>
+                                        if (!string.IsNullOrWhiteSpace(singleDayEvent.AlternateVenueName))
+                                        {
+                                            <text>@singleDayEvent.AlternateVenueName, </text>
+                                        }
+                                        else
+                                        {
+                                            <text>@singleDayEvent.Venue.FullName, </text>
+                                        }
+
+                                        <text>@singleDayEvent.Venue.City</text>
                                     }
 
                                     @if (singleDayEvent is Concert)
@@ -186,7 +195,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                     var index = 1;
                                                     var count = singleDayEvent.OtherAttendees.Count;
 
-                                                    foreach (var attendee in singleDayEvent.OtherAttendees)
+                                                    foreach (var attendee in singleDayEvent.OtherAttendees.OrderBy(a => a.Position))
                                                     {
                                                         if (index > 1)
                                                         {
@@ -200,7 +209,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                             }
                                                         }
 
-                                                        @Html.Raw(attendee.Name)
+                                                        @Html.Raw(attendee.Person.Name)
                                                         index++;
                                                     }
                                                 }
@@ -494,7 +503,14 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
                                                                         @if (eventPurchase.Event.Venue != null)
                                                                         {
-                                                                            <text> at @eventPurchase.Event.Venue.Name</text>
+                                                                            if (!string.IsNullOrWhiteSpace(eventPurchase.Event.AlternateVenueName))
+                                                                            {
+                                                                                <text> at @eventPurchase.Event.AlternateVenueName</text>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <text> at @eventPurchase.Event.Venue.FullName</text>
+                                                                            }
                                                                         }
 
                                                                     </li>

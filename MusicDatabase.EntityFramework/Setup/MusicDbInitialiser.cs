@@ -199,7 +199,9 @@ namespace MusicDatabase.EntityFramework
                         else
                         {
                             PurchaseDetails purchaseDetails = null;
-                            var purchaseLocation = locations.Find(l => l.Name == releaseCopy["PurchaseLocation"].ToString());
+
+                            var locationName = releaseCopy["PurchaseLocation"].ToString();
+                            var purchaseLocation = locations.Find(l => (l.FullName == locationName) || (l.OtherNames.Any(n => n.Name == locationName)));
 
                             if (Convert.ToBoolean(releaseCopy["isOnlinePurchase"]))
                             {
@@ -579,6 +581,20 @@ namespace MusicDatabase.EntityFramework
                         }
                     }
 
+                    // Other Names
+                    var otherNames = row["Other Names"].ToString();
+                    if(!string.IsNullOrWhiteSpace(otherNames))
+                    {
+                        var names = otherNames.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        int position = 0;
+
+                        foreach (var otherName in names)
+                        {
+                            location.OtherNames.Add(new AlternateLocationName(position, otherName));
+                            position++;
+                        }
+                    }
+
                     locations.Add(location);
                 }
             }
@@ -660,8 +676,21 @@ namespace MusicDatabase.EntityFramework
                 var singleDayEvent = new T();
                 singleDayEvent.EventDate = DateTime.Parse(row["Date"].ToString()); ;
                 singleDayEvent.EventName = row["Event Name"].ToString();
-                singleDayEvent.Venue = locations.FirstOrDefault(l => l.Name == row["Venue"].ToString());
                 singleDayEvent.Notes = row["Show Notes"].ToString();
+
+                // Venue
+                string venueName = row["Venue"].ToString();
+                if (!string.IsNullOrWhiteSpace(venueName))
+                {
+                    var venue = locations.Find(l => (l.FullName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
+                    if (venue != null)
+                    {
+                        singleDayEvent.Venue = venue;
+
+                        if (venue.Name != venueName)
+                            singleDayEvent.AlternateVenueName = venueName;
+                    }
+                }
 
                 // Group
                 if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
@@ -678,11 +707,15 @@ namespace MusicDatabase.EntityFramework
 
                 // Attendees
                 string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                int position = 1;
                 foreach (var attendeeName in attendees)
                 {
                     var attendee = people.First(p => p.Name == attendeeName);
-                    attendee.MusicalEvents.Add(singleDayEvent);
-                    singleDayEvent.OtherAttendees.Add(attendee);
+                    attendee.EventsAttended.Add(singleDayEvent);
+                    singleDayEvent.OtherAttendees.Add(new EventAttendee(position, attendee));
+
+                    position++;
                 }
 
                 singleDayEvents.Add(singleDayEvent);

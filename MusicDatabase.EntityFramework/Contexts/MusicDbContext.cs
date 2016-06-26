@@ -30,7 +30,17 @@ namespace MusicDatabase.EntityFramework
                 {
                     g.MapLeftKey("PersonID");
                     g.MapRightKey("CopyID");
-                    g.ToTable("GiftsGiven");
+                    g.ToTable("PersonGiftsGiven");
+                });
+
+            modelBuilder.Entity<Person>()
+                .HasMany(p => p.EventsAttended)
+                .WithMany()
+                .Map(e =>
+                {
+                    e.MapLeftKey("PersonID");
+                    e.MapRightKey("MusicalEventID");
+                    e.ToTable("PersonEventsAttended");
                 });
 
             modelBuilder.Entity<MusicalEntity>()
@@ -77,19 +87,14 @@ namespace MusicDatabase.EntityFramework
                 });
 
             modelBuilder.Entity<Location>();
+            modelBuilder.Entity<AlternateLocationName>()
+                .ToTable("LocationAlternateName"); // So it gets grouped with the other Location tables
+
             modelBuilder.Entity<LocationGroup>();
+
             modelBuilder.Entity<Website>();
 
-            modelBuilder.Entity<MusicalEvent>()
-                .HasMany(e => e.OtherAttendees)
-                .WithMany(p => p.MusicalEvents)
-                .Map(a =>
-                {
-                    a.MapLeftKey("MusicalEventID");
-                    a.MapRightKey("PersonID");
-                    a.ToTable("EventAttendees");
-                });
-
+            modelBuilder.Entity<MusicalEvent>();
             modelBuilder.Entity<EventGroup>();
             modelBuilder.Entity<Concert>();
             modelBuilder.Entity<Festival>();

@@ -33,7 +33,8 @@ namespace MusicDatabase.Model
         // Collection of Concerts / Festivals
         public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
 
-        // Previous Names
+        // Other Names
+        public virtual ICollection<AlternateLocationName> OtherNames { get; set; }
 
         public string Notes { get; set; }
 
@@ -61,6 +62,31 @@ namespace MusicDatabase.Model
             Country = country;
 
             MusicalEvents = new List<MusicalEvent>();
+            OtherNames = new List<AlternateLocationName>();
+        }
+        #endregion
+    }
+
+    public class AlternateLocationName
+    {
+        #region Properties
+        public Guid ID { get; set; }
+        public int Position { get; set; }
+        public string Name { get; set; }
+        #endregion
+
+        #region Constructors
+        public AlternateLocationName()
+            : this(0, "")
+        {
+
+        }
+
+        public AlternateLocationName(int position, string name)
+        {
+            ID = Guid.NewGuid();
+            Position = position;
+            Name = name;
         }
         #endregion
     }
