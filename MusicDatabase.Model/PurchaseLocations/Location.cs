@@ -10,8 +10,12 @@ namespace MusicDatabase.Model
     {
         #region Properties
         public string Name { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+        public string Address { get; set; }
 
-        public string FullName
+        public string SearchName
         {
             get
             {
@@ -21,11 +25,6 @@ namespace MusicDatabase.Model
                     return Name;
             }
         }
-
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Country { get; set; }
-        public string Address { get; set; }
 
         // Location Group
         public virtual LocationGroup LocationGroup { get; set; }
@@ -87,6 +86,30 @@ namespace MusicDatabase.Model
             ID = Guid.NewGuid();
             Position = position;
             Name = name;
+        }
+        #endregion
+    }
+
+    public class LocationGroup : AbstractGroup
+    {
+        #region Properties
+        public virtual ICollection<Location> Locations { get; set; }
+
+        // A group of locations can have a website (i.e. JB Hifi or Red Eye Records)
+        public virtual Website Website { get; set; }
+        #endregion
+
+        #region Constructors
+        public LocationGroup()
+            : this("", "")
+        {
+
+        }
+
+        public LocationGroup(string name, string notes)
+            : base(name, notes)
+        {
+            Locations = new List<Location>();
         }
         #endregion
     }

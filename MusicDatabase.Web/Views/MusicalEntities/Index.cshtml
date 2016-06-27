@@ -123,7 +123,12 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                         }
                                         else
                                         {
-                                            <text>@singleDayEvent.Venue.FullName, </text>
+                                            if(singleDayEvent.Venue.LocationGroup != null)
+                                            {
+                                                <text>@singleDayEvent.Venue.LocationGroup - </text>
+                                            }
+
+                                            <text>@singleDayEvent.Venue.Name, </text>
                                         }
 
                                         <text>@singleDayEvent.Venue.City</text>
@@ -446,7 +451,15 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
                                                                 if (storePurchase.PurchaseLocation != null)
                                                                 {
-                                                                    <li>Purchased from @storePurchase.PurchaseLocation.FullName</li>
+                                                                    <li>Purchased from 
+                                                                        
+                                                                        @if(storePurchase.PurchaseLocation.LocationGroup != null)
+                                                                        {
+                                                                            <text>@storePurchase.PurchaseLocation.LocationGroup.Name - </text>
+                                                                        }
+
+                                                                        @storePurchase.PurchaseLocation.Name
+                                                                    </li>
                                                                 }
                                                             }
                                                             else if (purchaseDetails is OnlinePurchase)
@@ -471,6 +484,11 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                                         }
 
                                                                         @onlinePurchase.Website.Name
+
+                                                                        @if(onlinePurchase.Website.WebsiteGroup != null)
+                                                                        {
+                                                                            <text>(via @onlinePurchase.Website.WebsiteGroup.Name)</text>
+                                                                        }
 
                                                                         @if (onlinePurchase.PurchaseDate.HasValue)
                                                                         {
@@ -509,7 +527,14 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                                             }
                                                                             else
                                                                             {
-                                                                                <text> at @eventPurchase.Event.Venue.FullName</text>
+                                                                                <text> at </text>
+
+                                                                                if(eventPurchase.Event.Venue.LocationGroup != null)
+                                                                                {
+                                                                                    <text>@eventPurchase.Event.Venue.LocationGroup - </text>
+                                                                                }
+
+                                                                                <text>@eventPurchase.Event.Venue.Name</text>
                                                                             }
                                                                         }
 

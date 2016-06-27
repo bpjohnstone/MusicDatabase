@@ -96,8 +96,12 @@ namespace MusicDatabase.EntityFramework
             }
 
             var musicalEntities = ImportMusicalEntities(context, artistData);
-            var locations = ImportLocations(context, locationData);
+
+            var locationGroups = ImportGroups<LocationGroup>(context, locationData);
+            var locations = ImportLocations(context, locationGroups, locationData);
             var websites = ImportWebsites(context, websiteData);
+            AttachWebsitesToLocationGroups(context, locationGroups, websites, websiteData);
+
             var people = ImportPeople(context, peopleData);
 
             var musicalEvents = new List<SingleDayEvent>();
@@ -201,7 +205,7 @@ namespace MusicDatabase.EntityFramework
                             PurchaseDetails purchaseDetails = null;
 
                             var locationName = releaseCopy["PurchaseLocation"].ToString();
-                            var purchaseLocation = locations.Find(l => (l.FullName == locationName) || (l.OtherNames.Any(n => n.Name == locationName)));
+                            var purchaseLocation = locations.Find(l => (l.SearchName == locationName) || (l.OtherNames.Any(n => n.Name == locationName)));
 
                             if (Convert.ToBoolean(releaseCopy["isOnlinePurchase"]))
                             {
@@ -223,7 +227,7 @@ namespace MusicDatabase.EntityFramework
 
                                 // Retrieve Website
                                 if (releaseCopy["Website"] != DBNull.Value)
-                                    onlinePurchase.Website = websites.Find(w => w.Name == releaseCopy["Website"].ToString());
+                                    onlinePurchase.Website = websites.Find(w => w.SearchName == releaseCopy["Website"].ToString());
 
                                 purchaseDetails = onlinePurchase;
                             }
@@ -243,7 +247,7 @@ namespace MusicDatabase.EntityFramework
                             {
                                 // By default, all copies are store purchases...
                                 var storePurchase = new StorePurchase();
-                                storePurchase.PurchaseLocation = locations.Find(l => l.FullName == releaseCopy["PurchaseLocation"].ToString());
+                                storePurchase.PurchaseLocation = locations.Find(l => l.SearchName == releaseCopy["PurchaseLocation"].ToString());
                                 purchaseDetails = storePurchase;
                             }
 
@@ -555,10 +559,9 @@ namespace MusicDatabase.EntityFramework
             return musicalEntities;
         }
 
-        private List<Location> ImportLocations(MusicDbContext context, DataTable locationData)
+        private List<Location> ImportLocations(MusicDbContext context, List<LocationGroup> locationGroups, DataTable locationData)
         {
             var locations = new List<Location>();
-            var locationGroups = ImportGroups<LocationGroup>(context, locationData);
 
             foreach (DataRow row in locationData.Rows)
             {
@@ -608,12 +611,28 @@ namespace MusicDatabase.EntityFramework
         private List<Website> ImportWebsites(MusicDbContext context, DataTable websiteData)
         {
             var websites = new List<Website>();
+            var websiteGroups = ImportGroups<WebsiteGroup>(context, websiteData);
 
             foreach (DataRow row in websiteData.Rows)
             {
                 string name = row["Name"].ToString();
                 if (!string.IsNullOrWhiteSpace(name))
-                    websites.Add(new Website(name));
+                {
+                    var website = new Website(name);
+
+                    // Group
+                    if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
+                    {
+                        var websiteGroup = websiteGroups.Find(g => g.Name == row["Group"].ToString());
+                        if (websiteGroup != null)
+                        {
+                            website.WebsiteGroup = websiteGroup;
+                            websiteGroup.Websites.Add(website);
+                        }
+                    }
+
+                    websites.Add(website);
+                }                    
             }
 
             context.Set<Website>().AddRange(websites);
@@ -641,6 +660,23 @@ namespace MusicDatabase.EntityFramework
             context.SaveChanges();
 
             return people;
+        }
+
+        private void AttachWebsitesToLocationGroups(MusicDbContext context, List<LocationGroup> locationGroups, List<Website> websites, DataTable websiteData)
+        {
+            foreach(DataRow row in websiteData.Select("[Location Group] <> ''"))
+            {
+                // Retrieve Location Group
+                var locationGroup = locationGroups.Find(g => g.Name == row["Location Group"].ToString());
+                if (locationGroup != null)
+                {
+                    var website = websites.Find(w => w.Name == row["Name"].ToString());
+                    if (website != null)
+                        locationGroup.Website = website;
+                }
+            }
+
+            context.SaveChanges();
         }
 
         private List<T> ImportGroups<T>(MusicDbContext context, DataTable importData) where T : AbstractGroup, new()
@@ -682,7 +718,7 @@ namespace MusicDatabase.EntityFramework
                 string venueName = row["Venue"].ToString();
                 if (!string.IsNullOrWhiteSpace(venueName))
                 {
-                    var venue = locations.Find(l => (l.FullName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
+                    var venue = locations.Find(l => (l.SearchName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
                     if (venue != null)
                     {
                         singleDayEvent.Venue = venue;

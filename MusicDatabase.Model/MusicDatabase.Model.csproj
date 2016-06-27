@@ -48,7 +48,6 @@
     <Compile Include="MusicalEvents\EventAttendee.cs" />
     <Compile Include="MusicalEvents\SingleDayEvent.cs" />
     <Compile Include="Person.cs" />
-    <Compile Include="PurchaseLocations\LocationGroup.cs" />
     <Compile Include="PurchaseLocations\Website.cs" />
     <Compile Include="MusicalEvents\MusicalEvent.cs" />
     <Compile Include="PurchaseLocations\Location.cs" />
