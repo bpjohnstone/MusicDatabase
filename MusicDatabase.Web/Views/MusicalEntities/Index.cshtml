@@ -87,146 +87,152 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                     <ul>
                         @foreach (var performance in item.Performances.OrderBy(p => p.Event.EventDate))
                         {
-                            if (performance.Event is SingleDayEvent)
-                            {
-                                var singleDayEvent = performance.Event as SingleDayEvent;
+                            var musicalEvent = performance.Event;
 
-                                <li @if (!performance.Attended) { @Html.Raw("style=\"color: grey; font-style: italic;\"")  }>
+                            <li @if (!performance.Attended) { @Html.Raw("style=\"color: grey; font-style: italic;\"")   }>
 
-                                    @if (singleDayEvent.EventDate.HasValue)
+                                @if (musicalEvent.EventDate.HasValue)
+                                {
+                                    <text>@musicalEvent.EventDate.Value.ToString("dd/MM/yyyy") - </text>
+                                }
+
+                                @if (musicalEvent.EventGroup != null)
+                                {
+                                    <text>@musicalEvent.EventGroup.Name </text>
+
+                                    if (musicalEvent is Festival)
                                     {
-                                        <text>@singleDayEvent.EventDate.Value.ToString("dd/MM/yyyy") - </text>
+                                        <span style="font-size: 10px; color: red;"><b>[Festival]</b></span>
                                     }
-
-                                    @if (singleDayEvent.EventGroup != null)
+                                    else if(musicalEvent is MultiDayFestival)
                                     {
-                                        <text>@singleDayEvent.EventGroup.Name </text>
+                                        var multiDayFestival = musicalEvent as MultiDayFestival;
+                                        var day = multiDayFestival.FestivalGroup.Days.OrderBy(f => f.EventDate).ToList().IndexOf(multiDayFestival) + 1;
 
-                                        if (singleDayEvent is Festival)
-                                        {
-                                            <span style="font-size: 10px; color: red;"><b>[Festival]</b></span>
-                                        }
+                                        <text>(Day @day)</text>
 
-                                        <text> - </text>
+                                        <span style="font-size: 10px; color: maroon;"><b>[Multi-Day Festival]</b></span>
                                     }
+                                    
+                                    <text> - </text>
+                                }
 
-                                    @if (!string.IsNullOrWhiteSpace(singleDayEvent.EventName))
+                                @if (!string.IsNullOrWhiteSpace(musicalEvent.EventName))
+                                {
+                                    <text>@musicalEvent.EventName - </text>
+                                }
+
+                                @if (musicalEvent.Venue != null)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(musicalEvent.AlternateVenueName))
                                     {
-                                        <text>@singleDayEvent.EventName - </text>
-                                    }
-
-                                    @if (singleDayEvent.Venue != null)
-                                    {
-                                        if (!string.IsNullOrWhiteSpace(singleDayEvent.AlternateVenueName))
-                                        {
-                                            <text>@singleDayEvent.AlternateVenueName, </text>
-                                        }
-                                        else
-                                        {
-                                            if(singleDayEvent.Venue.LocationGroup != null)
-                                            {
-                                                <text>@singleDayEvent.Venue.LocationGroup - </text>
-                                            }
-
-                                            <text>@singleDayEvent.Venue.Name, </text>
-                                        }
-
-                                        <text>@singleDayEvent.Venue.City</text>
-                                    }
-
-                                    @if (singleDayEvent is Concert)
-                                    {
-                                        if (performance is Headliner)
-                                        {
-                                            if (performance.Performers.Count > 1)
-                                            {
-                                                <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
-                                            }
-
-                                            if (!string.IsNullOrWhiteSpace(performance.PerformingAs))
-                                            {
-                                                <text>(Performing as @performance.PerformingAs)</text>
-                                            }
-
-                                            if (singleDayEvent.Lineup.Count(p => p is Headliner) > 1)
-                                            {
-                                                <text>(Co-headlining with @CreateMusicalEntityList(singleDayEvent.Lineup.Where(p => p is Headliner && p.ID != performance.ID).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>
-                                            }
-                                        }
-                                        else if (performance is Support)
-                                        {
-                                            if (performance.Performers.Count > 1)
-                                            {
-                                                <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
-                                            }
-
-                                            if (singleDayEvent.Lineup.Count(l => l is Headliner) > 0)
-                                            {
-                                                <text>(Supporting @CreateMusicalEntityList(singleDayEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
-                                            }
-                                            else
-                                            {
-                                                <text>(Support)</text>
-                                            }
-                                        }
+                                        <text>@musicalEvent.AlternateVenueName, </text>
                                     }
                                     else
                                     {
-                                        if (performance is Headliner)
+                                        if (musicalEvent.Venue.LocationGroup != null)
                                         {
-                                            <text>(Headliner)</text>
+                                            <text>@musicalEvent.Venue.LocationGroup.Name - </text>
+                                        }
+
+                                        <text>@musicalEvent.Venue.Name, </text>
+                                    }
+
+                                    <text>@musicalEvent.Venue.City</text>
+                                }
+
+                                @if (musicalEvent is Concert)
+                                {
+                                    if (performance is Headliner)
+                                    {
+                                        if (performance.Performers.Count > 1)
+                                        {
+                                            <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace(performance.PerformingAs))
+                                        {
+                                            <text>(Performing as @performance.PerformingAs)</text>
+                                        }
+
+                                        if (musicalEvent.Lineup.Count(p => p is Headliner) > 1)
+                                        {
+                                            <text>(Co-headlining with @CreateMusicalEntityList(musicalEvent.Lineup.Where(p => p is Headliner && p.ID != performance.ID).Select(p => p.Performers).First().Select(p => p.MusicalEntity)))</text>
+                                        }
+                                    }
+                                    else if (performance is Support)
+                                    {
+                                        if (performance.Performers.Count > 1)
+                                        {
+                                            <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
+                                        }
+
+                                        if (musicalEvent.Lineup.Count(l => l is Headliner) > 0)
+                                        {
+                                            <text>(Supporting @CreateMusicalEntityList(musicalEvent.Lineup.Where(l => l is Headliner).Select(p => p.Performers).First().Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
                                         }
                                         else
                                         {
-                                            if (performance.Performers.Count > 1)
-                                            {
-                                                <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
-                                            }
+                                            <text>(Support)</text>
                                         }
                                     }
-
-                                    @if (!performance.Attended)
+                                }
+                                else
+                                {
+                                    if (performance is Headliner)
                                     {
-                                        <text>(Did not see)</text>
+                                        <text>(Headliner)</text>
                                     }
-
-                                    @if (singleDayEvent.OtherAttendees.Count > 0)
+                                    else
                                     {
-                                        <ul>
-                                            <li>
-                                                @Html.Raw("Attended with: ")
+                                        if (performance.Performers.Count > 1)
+                                        {
+                                            <text>(Performing with @CreateMusicalEntityList(performance.Performers.Select(p => p.MusicalEntity).Where(e => e.ID != item.ID)))</text>
+                                        }
+                                    }
+                                }
 
-                                                @{
-                                                    var index = 1;
-                                                    var count = singleDayEvent.OtherAttendees.Count;
+                                @if (!performance.Attended)
+                                {
+                                    <text>(Did not see)</text>
+                                }
 
-                                                    foreach (var attendee in singleDayEvent.OtherAttendees.OrderBy(a => a.Position))
+                                @if (musicalEvent.OtherAttendees.Count > 0)
+                                {
+                                    <ul>
+                                        <li>
+                                            @Html.Raw("Attended with: ")
+
+                                            @{
+                                                var index = 1;
+                                                var count = musicalEvent.OtherAttendees.Count;
+
+                                                foreach (var attendee in musicalEvent.OtherAttendees.OrderBy(a => a.Position))
+                                                {
+                                                    if (index > 1)
                                                     {
-                                                        if (index > 1)
+                                                        if (index == count)
                                                         {
-                                                            if (index == count)
-                                                            {
-                                                                @Html.Raw(" &amp; ");
-                                                            }
-                                                            else
-                                                            {
-                                                                @Html.Raw(", ");
-                                                            }
+                                                            @Html.Raw(" &amp; ");
                                                         }
-
-                                                        @Html.Raw(attendee.Person.Name)
-                                                        index++;
+                                                        else
+                                                        {
+                                                            @Html.Raw(", ");
+                                                        }
                                                     }
+
+                                                    @Html.Raw(attendee.Person.Name)
+                                                    index++;
                                                 }
+                                            }
 
-                                            </li>
-                                        </ul>
-                                                    }
-                                </li>
-                                                        }
-                                                    }
+                                        </li>
+                                    </ul>
+                                                }
+                            </li>
+                                                }
                     </ul>
-                                                    }
+                                                }
 
                 @if (item.Discography.Count > 0)
                 {
@@ -451,9 +457,10 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
                                                                 if (storePurchase.PurchaseLocation != null)
                                                                 {
-                                                                    <li>Purchased from 
-                                                                        
-                                                                        @if(storePurchase.PurchaseLocation.LocationGroup != null)
+                                                                    <li>
+                                                                        Purchased from
+
+                                                                        @if (storePurchase.PurchaseLocation.LocationGroup != null)
                                                                         {
                                                                             <text>@storePurchase.PurchaseLocation.LocationGroup.Name - </text>
                                                                         }
@@ -485,7 +492,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
                                                                         @onlinePurchase.Website.Name
 
-                                                                        @if(onlinePurchase.Website.WebsiteGroup != null)
+                                                                        @if (onlinePurchase.Website.WebsiteGroup != null)
                                                                         {
                                                                             <text>(via @onlinePurchase.Website.WebsiteGroup.Name)</text>
                                                                         }
@@ -529,7 +536,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                                             {
                                                                                 <text> at </text>
 
-                                                                                if(eventPurchase.Event.Venue.LocationGroup != null)
+                                                                                if (eventPurchase.Event.Venue.LocationGroup != null)
                                                                                 {
                                                                                     <text>@eventPurchase.Event.Venue.LocationGroup - </text>
                                                                                 }
@@ -586,6 +593,6 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
             </td>
         </tr>
-                                                    }
+                                                }
 
 </table>

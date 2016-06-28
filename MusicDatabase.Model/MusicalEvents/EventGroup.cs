@@ -28,4 +28,25 @@ namespace MusicDatabase.Model
         }
         #endregion
     }
+
+    public class MultiDayFestivalGroup : AbstractGroup
+    {
+        #region Properties
+        public virtual ICollection<MultiDayFestival> Days { get; set; }
+        #endregion
+
+        #region Constructors
+        public MultiDayFestivalGroup()
+            : this("", "")
+        {
+
+        }
+
+        public MultiDayFestivalGroup(string name, string notes)
+            : base(name, notes)
+        {
+            Days = new List<MultiDayFestival>();
+        }
+        #endregion
+    }
 }

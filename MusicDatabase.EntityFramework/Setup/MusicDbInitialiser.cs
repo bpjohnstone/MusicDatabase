@@ -29,6 +29,7 @@ namespace MusicDatabase.EntityFramework
             var websiteData = new DataTable();
             var concertData = new DataTable();
             var festivalData = new DataTable();
+            var multiDayFestivalData = new DataTable();
 
             // Create Formats
             CreateReleaseFormats(context);
@@ -93,6 +94,10 @@ namespace MusicDatabase.EntityFramework
                 oleDbCommand = new OleDbCommand("SELECT * FROM [Festivals$]", oleDbConnect);
                 oleDbAdapter = new OleDbDataAdapter(oleDbCommand);
                 oleDbAdapter.Fill(festivalData);
+
+                oleDbCommand = new OleDbCommand("SELECT * FROM [Multi-Day Festivals$]", oleDbConnect);
+                oleDbAdapter = new OleDbDataAdapter(oleDbCommand);
+                oleDbAdapter.Fill(multiDayFestivalData);
             }
 
             var musicalEntities = ImportMusicalEntities(context, artistData);
@@ -104,9 +109,10 @@ namespace MusicDatabase.EntityFramework
 
             var people = ImportPeople(context, peopleData);
 
-            var musicalEvents = new List<SingleDayEvent>();
+            var musicalEvents = new List<MusicalEvent>();
             ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, concertData);
             ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, festivalData);
+            ImportMultiDayFestivalData(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, multiDayFestivalData);
 
             List<Release> releases = new List<Release>();
 
@@ -679,17 +685,17 @@ namespace MusicDatabase.EntityFramework
             context.SaveChanges();
         }
 
-        private List<T> ImportGroups<T>(MusicDbContext context, DataTable importData) where T : AbstractGroup, new()
+        private List<T> ImportGroups<T>(MusicDbContext context, DataTable importData, string columnName = "Group") where T : AbstractGroup, new()
         {
             var groups = new List<T>();
-            var groupData = importData.DefaultView.ToTable(true, "Group");
+            var groupData = importData.DefaultView.ToTable(true, columnName);
 
             foreach (DataRow row in groupData.Rows)
             {
-                if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
+                if (!string.IsNullOrWhiteSpace(row[columnName].ToString()))
                 {
                     var group = new T();
-                    group.Name = row["Group"].ToString();
+                    group.Name = row[columnName].ToString();
                     groups.Add(group);
                 }
             }
@@ -700,69 +706,102 @@ namespace MusicDatabase.EntityFramework
             return groups;
         }
 
-        private void ImportSingleDayEventData<T>(MusicDbContext context, List<SingleDayEvent> musicalEvents,
+        private void ImportSingleDayEventData<T>(MusicDbContext context, List<MusicalEvent> musicalEvents,
             List<MusicalEntity> musicalEntities, List<Location> locations,
-            List<Person> people, DataTable importData) where T : SingleDayEvent, new()
+            List<Person> people, DataTable importData) where T : MusicalEvent, new()
         {
-            var singleDayEvents = new List<T>();
+            var importedEvents = new List<T>();
             var eventGroups = ImportGroups<EventGroup>(context, importData);
 
             foreach (DataRow row in importData.Rows)
             {
-                var singleDayEvent = new T();
-                singleDayEvent.EventDate = DateTime.Parse(row["Date"].ToString()); ;
-                singleDayEvent.EventName = row["Event Name"].ToString();
-                singleDayEvent.Notes = row["Show Notes"].ToString();
-
-                // Venue
-                string venueName = row["Venue"].ToString();
-                if (!string.IsNullOrWhiteSpace(venueName))
-                {
-                    var venue = locations.Find(l => (l.SearchName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
-                    if (venue != null)
-                    {
-                        singleDayEvent.Venue = venue;
-
-                        if (venue.Name != venueName)
-                            singleDayEvent.AlternateVenueName = venueName;
-                    }
-                }
-
-                // Group
-                if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))
-                    singleDayEvent.EventGroup = eventGroups.Find(g => g.Name == row["Group"].ToString());
-
-                // Headliners
-                SetupPerformances<Headliner>(singleDayEvent, row["Headliners"].ToString(), musicalEntities);
-
-                // Supports or Performers
-                if (singleDayEvent is Concert)
-                    SetupPerformances<Support>(singleDayEvent, row["Other Performers"].ToString(), musicalEntities);
-                else
-                    SetupPerformances<Performance>(singleDayEvent, row["Other Performers"].ToString(), musicalEntities);
-
-                // Attendees
-                string[] attendees = row["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-                int position = 1;
-                foreach (var attendeeName in attendees)
-                {
-                    var attendee = people.First(p => p.Name == attendeeName);
-                    attendee.EventsAttended.Add(singleDayEvent);
-                    singleDayEvent.OtherAttendees.Add(new EventAttendee(position, attendee));
-
-                    position++;
-                }
-
-                singleDayEvents.Add(singleDayEvent);
-                musicalEvents.Add(singleDayEvent);
+                var musicalEvent = ImportEventData<T>(musicalEntities, locations, eventGroups, people, row);
+                importedEvents.Add(musicalEvent);
+                musicalEvents.Add(musicalEvent);
             }
 
-            context.Set<T>().AddRange(singleDayEvents);
+            context.Set<T>().AddRange(importedEvents);
             context.SaveChanges();
         }
 
-        private void SetupPerformances<T>(SingleDayEvent singleDayEvent, string performanceData, List<MusicalEntity> musicalEntities) where T : Performance, new()
+        private void ImportMultiDayFestivalData(MusicDbContext context, List<MusicalEvent> musicalEvents, 
+            List<MusicalEntity> musicalEntities, List<Location> locations, List<Person> people, 
+            DataTable importData)
+        {
+            var importedEvents = new List<MultiDayFestival>();
+
+            var eventGroups = ImportGroups<EventGroup>(context, importData);
+            var festivalGroups = ImportGroups<MultiDayFestivalGroup>(context, importData, "Festival Group");
+
+            foreach(var festivalGroup in festivalGroups)
+            {
+                var festivalData = importData.Select("[Festival Group] = '" + festivalGroup.Name + "'");
+                foreach(DataRow row in festivalData)
+                {
+                    var musicalEvent = ImportEventData<MultiDayFestival>(musicalEntities, locations, eventGroups, people, row);
+                    musicalEvent.FestivalGroup = festivalGroup;
+
+                    importedEvents.Add(musicalEvent);
+                    musicalEvents.Add(musicalEvent);
+                }
+            }
+
+            context.Set<MultiDayFestival>().AddRange(importedEvents);
+            context.SaveChanges();
+        }
+
+        private T ImportEventData<T>(List<MusicalEntity> musicalEntities, List<Location> locations, 
+            List<EventGroup> eventGroups, List<Person> people, DataRow eventData) where T : MusicalEvent, new()
+        {
+            var musicalEvent = new T();
+            musicalEvent.EventDate = DateTime.Parse(eventData["Date"].ToString()); ;
+            musicalEvent.EventName = eventData["Event Name"].ToString();
+            musicalEvent.Notes = eventData["Show Notes"].ToString();
+
+            // Venue
+            string venueName = eventData["Venue"].ToString();
+            if (!string.IsNullOrWhiteSpace(venueName))
+            {
+                var venue = locations.Find(l => (l.SearchName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
+                if (venue != null)
+                {
+                    musicalEvent.Venue = venue;
+
+                    if (venue.SearchName != venueName)
+                        musicalEvent.AlternateVenueName = venueName;
+                }
+            }
+
+            // Group
+            if (!string.IsNullOrWhiteSpace(eventData["Group"].ToString()))
+                musicalEvent.EventGroup = eventGroups.Find(g => g.Name == eventData["Group"].ToString());
+
+            // Headliners
+            SetupPerformances<Headliner>(musicalEvent, eventData["Headliners"].ToString(), musicalEntities);
+
+            // Supports or Performers
+            if (musicalEvent is Concert)
+                SetupPerformances<Support>(musicalEvent, eventData["Other Performers"].ToString(), musicalEntities);
+            else
+                SetupPerformances<Performance>(musicalEvent, eventData["Other Performers"].ToString(), musicalEntities);
+
+            // Attendees
+            string[] attendees = eventData["With"].ToString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+            int position = 1;
+            foreach (var attendeeName in attendees)
+            {
+                var attendee = people.First(p => p.Name == attendeeName);
+                attendee.EventsAttended.Add(musicalEvent);
+                musicalEvent.OtherAttendees.Add(new EventAttendee(position, attendee));
+
+                position++;
+            }
+
+            return musicalEvent;
+        }
+
+        private void SetupPerformances<T>(MusicalEvent musicalEvent, string performanceData, List<MusicalEntity> musicalEntities) where T : Performance, new()
         {
             // Imported Performances are stored in a list of MusicalEntity Names (not SortNames), delimited by a semi colon
             // For example: You Am I;Something for Kate;British India, sees a lineup with You Am I, Something for Kate and
@@ -790,8 +829,8 @@ namespace MusicDatabase.EntityFramework
 
                 // Create the performance
                 var performance = new T();
-                performance.Position = singleDayEvent.Lineup.Count + 1;
-                performance.Event = singleDayEvent;
+                performance.Position = musicalEvent.Lineup.Count + 1;
+                performance.Event = musicalEvent;
 
                 // Check to see if this peformance was missed
                 if (details.EndsWith("[x]"))
@@ -818,7 +857,7 @@ namespace MusicDatabase.EntityFramework
                     performer.Performances.Add(performance);
                 }
 
-                singleDayEvent.Lineup.Add(performance);
+                musicalEvent.Lineup.Add(performance);
             }
         }
 
