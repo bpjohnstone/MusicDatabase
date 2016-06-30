@@ -32,12 +32,15 @@ namespace MusicDatabase.Model
         // Collection of Concerts / Festivals
         public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
 
+        // Collection of Purchases
+        public virtual ICollection<Copy> Purchases { get; set; }
+
         // Other Names
         public virtual ICollection<AlternateLocationName> OtherNames { get; set; }
 
         public string Notes { get; set; }
 
-        public bool Closed { get; set; }
+        public bool IsClosed { get; set; }
         #endregion
 
         #region Constructors
@@ -61,6 +64,7 @@ namespace MusicDatabase.Model
             Country = country;
 
             MusicalEvents = new List<MusicalEvent>();
+            Purchases = new List<Copy>();
             OtherNames = new List<AlternateLocationName>();
         }
         #endregion

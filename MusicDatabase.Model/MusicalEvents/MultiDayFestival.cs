@@ -10,6 +10,7 @@ namespace MusicDatabase.Model
     {
         #region Properties
         public virtual MultiDayFestivalGroup FestivalGroup { get; set; }
+        public int Day { get; set; }
         #endregion
 
         #region Constructors

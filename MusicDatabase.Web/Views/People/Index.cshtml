@@ -1,0 +1,42 @@
+﻿@model IEnumerable<MusicDatabase.ViewModel.PeopleListingDetails>
+
+@{
+    ViewBag.Title = "View";
+}
+
+<h2>View</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EventsAttended)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.GiftsGiven)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.OrderByDescending(p => p.EventsAttended).ThenBy(p => p.Name)) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EventsAttended)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.GiftsGiven)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
+        </td>
+    </tr>
+}
+
+</table>

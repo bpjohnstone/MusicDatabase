@@ -11,7 +11,7 @@ using System.Configuration;
 
 namespace MusicDatabase.EntityFramework
 {
-    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseAlways<MusicDbContext>
+    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseIfModelChanges<MusicDbContext>
     {
         protected override void Seed(MusicDbContext context)
         {
@@ -233,7 +233,14 @@ namespace MusicDatabase.EntityFramework
 
                                 // Retrieve Website
                                 if (releaseCopy["Website"] != DBNull.Value)
-                                    onlinePurchase.Website = websites.Find(w => w.SearchName == releaseCopy["Website"].ToString());
+                                {
+                                    var website = websites.Find(w => w.SearchName == releaseCopy["Website"].ToString());
+                                    if(website != null)
+                                    {
+                                        onlinePurchase.Website = website;
+                                        website.Purchases.Add(copy);
+                                    }
+                                }
 
                                 purchaseDetails = onlinePurchase;
                             }
@@ -243,9 +250,13 @@ namespace MusicDatabase.EntityFramework
 
                                 // Find Event...
                                 var musicalEvent = musicalEvents.Find(c => (c.EventDate == dateAdded) && (c.Venue == purchaseLocation));
-
                                 if (musicalEvent != null)
+                                {
                                     eventPurchase.Event = musicalEvent;
+
+                                    if (purchaseLocation != null)
+                                        purchaseLocation.Purchases.Add(copy);
+                                }                                    
 
                                 purchaseDetails = eventPurchase;
                             }
@@ -253,7 +264,11 @@ namespace MusicDatabase.EntityFramework
                             {
                                 // By default, all copies are store purchases...
                                 var storePurchase = new StorePurchase();
-                                storePurchase.PurchaseLocation = locations.Find(l => l.SearchName == releaseCopy["PurchaseLocation"].ToString());
+                                storePurchase.PurchaseLocation = purchaseLocation;
+
+                                if (purchaseLocation != null)
+                                    purchaseLocation.Purchases.Add(copy);
+
                                 purchaseDetails = storePurchase;
                             }
 
@@ -604,6 +619,10 @@ namespace MusicDatabase.EntityFramework
                         }
                     }
 
+                    // Closed
+                    if (row["Closed"] != DBNull.Value)
+                        location.IsClosed = Convert.ToBoolean(row["Closed"]);
+
                     locations.Add(location);
                 }
             }
@@ -735,11 +754,15 @@ namespace MusicDatabase.EntityFramework
 
             foreach(var festivalGroup in festivalGroups)
             {
-                var festivalData = importData.Select("[Festival Group] = '" + festivalGroup.Name + "'");
+                var festivalData = importData.Select("[Festival Group] = '" + festivalGroup.Name + "'", "Date ASC");
+                int day = 1;
+
                 foreach(DataRow row in festivalData)
                 {
                     var musicalEvent = ImportEventData<MultiDayFestival>(musicalEntities, locations, eventGroups, people, row);
                     musicalEvent.FestivalGroup = festivalGroup;
+                    musicalEvent.Day = day;
+                    day++;
 
                     importedEvents.Add(musicalEvent);
                     musicalEvents.Add(musicalEvent);

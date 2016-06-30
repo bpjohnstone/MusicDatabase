@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class ReleaseByYear
+    public class MusicalEventListing
     {
-        public int Year { get; set; }
+
     }
 }

@@ -18,7 +18,7 @@ namespace MusicDatabase.Web.Controllers
         // GET: Releases
         public ActionResult Index()
         {
-            return View();
+            return View("ByYearListing", Service.RetrieveReleasesByYear(DateTime.Now.Year));
         }
 
         [ActionName("Year")]

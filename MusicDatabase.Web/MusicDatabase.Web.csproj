@@ -47,6 +47,10 @@
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="AutoMapper, Version=5.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.5.0.0\lib\net45\AutoMapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
@@ -186,6 +190,9 @@
     <Content Include="Views\MusicalEntities\Index.cshtml" />
     <Content Include="Views\Releases\Index.cshtml" />
     <Content Include="Views\Releases\ByYearListing.cshtml" />
+    <Content Include="Views\People\Index.cshtml" />
+    <Content Include="Views\People\Details.cshtml" />
+    <Content Include="Views\Locations\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -203,14 +210,19 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="App_Start\UnityMvcActivator.cs" />
+    <Compile Include="Controllers\FormatsController.cs" />
+    <Compile Include="Controllers\LocationsController.cs" />
     <Compile Include="Controllers\MusicalEntitiesController.cs" />
+    <Compile Include="Controllers\PeopleController.cs" />
     <Compile Include="Controllers\ReleasesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Views\Formats\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MusicDatabase.EntityFramework\MusicDatabase.EntityFramework.csproj">
       <Project>{e8a9a8d0-2d41-4b35-891d-d118f308dbd6}</Project>
@@ -223,6 +235,10 @@
     <ProjectReference Include="..\MusicDatabase.Services\MusicDatabase.Services.csproj">
       <Project>{6a2c976f-865d-4694-b3b0-85eea34dadcc}</Project>
       <Name>MusicDatabase.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MusicDatabase.ViewModel\MusicDatabase.ViewModel.csproj">
+      <Project>{1ac26e7a-ca54-4fba-9b23-d7974e5132d2}</Project>
+      <Name>MusicDatabase.ViewModel</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

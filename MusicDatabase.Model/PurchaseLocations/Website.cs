@@ -23,6 +23,8 @@ namespace MusicDatabase.Model
                     return Name;
             }
         }
+
+        public virtual ICollection<Copy> Purchases { get; set; }
         #endregion
 
         #region Constructors
@@ -43,6 +45,7 @@ namespace MusicDatabase.Model
         {
             Name = name;
             Address = address;
+            Purchases = new List<Copy>();
         }
         #endregion
     }

@@ -89,7 +89,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                         {
                             var musicalEvent = performance.Event;
 
-                            <li @if (!performance.Attended) { @Html.Raw("style=\"color: grey; font-style: italic;\"")   }>
+                            <li @if (!performance.Attended) { @Html.Raw("style=\"color: grey; font-style: italic;\"")       }>
 
                                 @if (musicalEvent.EventDate.HasValue)
                                 {
@@ -104,16 +104,14 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                     {
                                         <span style="font-size: 10px; color: red;"><b>[Festival]</b></span>
                                     }
-                                    else if(musicalEvent is MultiDayFestival)
+                                    else if (musicalEvent is MultiDayFestival)
                                     {
                                         var multiDayFestival = musicalEvent as MultiDayFestival;
-                                        var day = multiDayFestival.FestivalGroup.Days.OrderBy(f => f.EventDate).ToList().IndexOf(multiDayFestival) + 1;
-
-                                        <text>(Day @day)</text>
+                                        <text>(Day @multiDayFestival.Day)</text>
 
                                         <span style="font-size: 10px; color: maroon;"><b>[Multi-Day Festival]</b></span>
                                     }
-                                    
+
                                     <text> - </text>
                                 }
 
@@ -124,21 +122,22 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
 
                                 @if (musicalEvent.Venue != null)
                                 {
+                                    var venueName = "";
+
                                     if (!string.IsNullOrWhiteSpace(musicalEvent.AlternateVenueName))
                                     {
-                                        <text>@musicalEvent.AlternateVenueName, </text>
+                                        venueName = musicalEvent.AlternateVenueName;
+                                    }
+                                    else if (musicalEvent.Venue.LocationGroup != null)
+                                    {
+                                        venueName = string.Format("{0} - {1}", musicalEvent.Venue.LocationGroup.Name, musicalEvent.Venue.Name);
                                     }
                                     else
                                     {
-                                        if (musicalEvent.Venue.LocationGroup != null)
-                                        {
-                                            <text>@musicalEvent.Venue.LocationGroup.Name - </text>
-                                        }
-
-                                        <text>@musicalEvent.Venue.Name, </text>
+                                        venueName = musicalEvent.Venue.Name;
                                     }
 
-                                    <text>@musicalEvent.Venue.City</text>
+                                    <text>@Html.ActionLink(venueName, "Details", "Locations", new { ID = musicalEvent.Venue.ID }, null), @musicalEvent.Venue.City</text>
                                 }
 
                                 @if (musicalEvent is Concert)
@@ -221,7 +220,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                         }
                                                     }
 
-                                                    @Html.Raw(attendee.Person.Name)
+                                                    @Html.ActionLink(attendee.Person.Name, "Details", "People", new { ID = attendee.Person.ID }, null);
                                                     index++;
                                                 }
                                             }
@@ -323,12 +322,10 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                         if (element.Count > 1)
                                                         {
                                                             @element.Count@element.Format.Code
-
                                                         }
                                                         else
                                                         {
                                                             @element.Format.Code
-
                                                         }
                                                     }
                                                     <ul>
@@ -348,48 +345,48 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                             var giftDetails = copy.AcquisitionDetails as GiftDetails;
 
                                                             <li><b><span style="font-size: 10px; color: crimson;">[Gift]</span></b></li>
-                                                            <li>
-                                                                @if (!string.IsNullOrWhiteSpace(giftDetails.Occasion))
-                                                                {
-                                                                    <span>@giftDetails.Occasion</span>
-                                                                }
-
-                                                                Gift
-
-                                                                @if (giftDetails.From.Count > 0)
-                                                                {
-                                                                    <text>from </text>
-
-                                                                    var index = 1;
-                                                                    var count = giftDetails.From.Count;
-
-                                                                    foreach (var person in giftDetails.From)
-                                                                    {
-                                                                        if (index > 1)
+                                                                    <li>
+                                                                        @if (!string.IsNullOrWhiteSpace(giftDetails.Occasion))
                                                                         {
-                                                                            if (index == count)
+                                                                            <span>@giftDetails.Occasion</span>
+                                                                        }
+
+                                                                        Gift
+
+                                                                        @if (giftDetails.From.Count > 0)
+                                                                        {
+                                                                            <text>from </text>
+
+                                                                            var index = 1;
+                                                                            var count = giftDetails.From.Count;
+
+                                                                            foreach (var person in giftDetails.From)
                                                                             {
-                                                                                @Html.Raw(" &amp; ")
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                @Html.Raw(", ")
+                                                                                if (index > 1)
+                                                                                {
+                                                                                    if (index == count)
+                                                                                    {
+                                                                                        @Html.Raw(" &amp; ")
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        @Html.Raw(", ")
+                                                                                    }
+                                                                                }
+
+                                                                                @Html.ActionLink(person.Name, "Details", "People", new { ID = person.ID }, null);
+
+                                                                                index++;
                                                                             }
                                                                         }
 
-                                                                        @Html.Raw(person.Name)
-
-                                                                        index++;
-                                                                    }
-                                                                }
-
-                                                            </li>
+                                                                    </li>
                                                         }
                                                         else if (copy.AcquisitionDetails is CompetitionItemDetails)
                                                         {
                                                             var competitionItemDetails = copy.AcquisitionDetails as CompetitionItemDetails;
                                                             <li><b><span style="font-size: 10px; color: crimson;">[Competition Item]</span></b></li>
-                                                            <li>Won from @competitionItemDetails.Source</li>
+                                                                    <li>Won from @competitionItemDetails.Source</li>
                                                         }
                                                         else if (copy.AcquisitionDetails is PurchaseDetails)
                                                         {
@@ -460,95 +457,111 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                                     <li>
                                                                         Purchased from
 
-                                                                        @if (storePurchase.PurchaseLocation.LocationGroup != null)
-                                                                        {
-                                                                            <text>@storePurchase.PurchaseLocation.LocationGroup.Name - </text>
-                                                                        }
+                                                                        @{
 
-                                                                        @storePurchase.PurchaseLocation.Name
-                                                                    </li>
-                                                                }
-                                                            }
-                                                            else if (purchaseDetails is OnlinePurchase)
-                                                            {
-                                                                var onlinePurchase = purchaseDetails as OnlinePurchase;
+                                                                            var locationName = "";
 
-                                                                if (onlinePurchase.Postage.HasValue)
-                                                                {
-                                                                    <li>Postage: @onlinePurchase.Postage.Value.ToString("c")</li>
-                                                                }
-
-                                                                if (onlinePurchase.Website != null)
-                                                                {
-                                                                    <li>
-                                                                        @if (copy.IsPledgeItem)
-                                                                        {
-                                                                            <span>Pledged at</span>
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            <span>Purchased from</span>
-                                                                        }
-
-                                                                        @onlinePurchase.Website.Name
-
-                                                                        @if (onlinePurchase.Website.WebsiteGroup != null)
-                                                                        {
-                                                                            <text>(via @onlinePurchase.Website.WebsiteGroup.Name)</text>
-                                                                        }
-
-                                                                        @if (onlinePurchase.PurchaseDate.HasValue)
-                                                                        {
-                                                                            <span>on @onlinePurchase.PurchaseDate.Value.ToString("dd/MM/yyyy")</span>
-                                                                        }
-
-                                                                    </li>
-                                                                }
-                                                            }
-                                                            else if (purchaseDetails is EventPurchase)
-                                                            {
-                                                                var eventPurchase = purchaseDetails as EventPurchase;
-
-                                                                if (eventPurchase.Event != null)
-                                                                {
-                                                                    <li>
-
-                                                                        Purchased at
-
-                                                                        @if (eventPurchase.Event is Concert)
-                                                                        {
-                                                                            var concert = eventPurchase.Event as Concert;
-                                                                            <text>@concert.Lineup.First(l => l.Position == 1).Performers.First().MusicalEntity.Name show</text>
-
-                                                                        }
-                                                                        else if (eventPurchase.Event is Festival)
-                                                                        {
-                                                                            @eventPurchase.Event.EventName
-                                                                        }
-
-                                                                        @if (eventPurchase.Event.Venue != null)
-                                                                        {
-                                                                            if (!string.IsNullOrWhiteSpace(eventPurchase.Event.AlternateVenueName))
+                                                                            if (storePurchase.PurchaseLocation.LocationGroup != null)
                                                                             {
-                                                                                <text> at @eventPurchase.Event.AlternateVenueName</text>
+                                                                                locationName = string.Format("{0} - {1}", storePurchase.PurchaseLocation.LocationGroup.Name, storePurchase.PurchaseLocation.Name);
                                                                             }
                                                                             else
                                                                             {
-                                                                                <text> at </text>
-
-                                                                                if (eventPurchase.Event.Venue.LocationGroup != null)
-                                                                                {
-                                                                                    <text>@eventPurchase.Event.Venue.LocationGroup - </text>
-                                                                                }
-
-                                                                                <text>@eventPurchase.Event.Venue.Name</text>
+                                                                                locationName = storePurchase.PurchaseLocation.Name;
                                                                             }
+
+                                                                            <text>@Html.ActionLink(locationName, "Details", "Locations", new { ID = storePurchase.PurchaseLocation.ID }, null), @storePurchase.PurchaseLocation.City</text>
                                                                         }
 
                                                                     </li>
-                                                                }
-                                                            }
-                                                        }
+                                                                                }
+                                                                            }
+                                                                            else if (purchaseDetails is OnlinePurchase)
+                                                                            {
+                                                                                var onlinePurchase = purchaseDetails as OnlinePurchase;
+
+                                                                                if (onlinePurchase.Postage.HasValue)
+                                                                                {
+                                                                                    <li>Postage: @onlinePurchase.Postage.Value.ToString("c")</li>
+                                                                                }
+
+                                                                                if (onlinePurchase.Website != null)
+                                                                                {
+                                                                                    <li>
+                                                                                        @if (copy.IsPledgeItem)
+                                                                                        {
+                                                                                            <span>Pledged at</span>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <span>Purchased from</span>
+                                                                                        }
+
+                                                                                        @onlinePurchase.Website.Name
+
+                                                                                        @if (onlinePurchase.Website.WebsiteGroup != null)
+                                                                                        {
+                                                                                            <text>(via @onlinePurchase.Website.WebsiteGroup.Name)</text>
+                                                                                        }
+
+                                                                                        @if (onlinePurchase.PurchaseDate.HasValue)
+                                                                                        {
+                                                                                            <span>on @onlinePurchase.PurchaseDate.Value.ToString("dd/MM/yyyy")</span>
+                                                                                        }
+
+                                                                                    </li>
+                                                                                }
+                                                                            }
+                                                                            else if (purchaseDetails is EventPurchase)
+                                                                            {
+                                                                                var eventPurchase = purchaseDetails as EventPurchase;
+
+                                                                                if (eventPurchase.Event != null)
+                                                                                {
+                                                                                    <li>
+
+                                                                                        Purchased at
+
+                                                                                        @if (eventPurchase.Event.EventGroup != null)
+                                                                                        {
+                                                                                            <text>@eventPurchase.Event.EventGroup.Name </text>
+                                                                                        }
+
+                                                                                        @if (!string.IsNullOrWhiteSpace(eventPurchase.Event.EventName))
+                                                                                        {
+                                                                                            <text>@eventPurchase.Event.EventName </text>
+                                                                                        }
+
+                                                                                        @if (eventPurchase.Event is Concert)
+                                                                                        {
+                                                                                            var concert = eventPurchase.Event as Concert;
+                                                                                            <text>@concert.Lineup.First(l => l.Position == 1).Performers.First().MusicalEntity.Name show</text>
+
+                                                                                        }
+
+                                                                                        @if (eventPurchase.Event.Venue != null)
+                                                                                        {
+                                                                                            if (!string.IsNullOrWhiteSpace(eventPurchase.Event.AlternateVenueName))
+                                                                                            {
+                                                                                                <text> at @eventPurchase.Event.AlternateVenueName</text>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <text> at </text>
+
+                                                                                                if (eventPurchase.Event.Venue.LocationGroup != null)
+                                                                                                {
+                                                                                                    <text>@eventPurchase.Event.Venue.LocationGroup - </text>
+                                                                                                }
+
+                                                                                                <text>@eventPurchase.Event.Venue.Name</text>
+                                                                                            }
+                                                                                        }
+
+                                                                                    </li>
+                                                                                    }
+                                                                                }
+                                                                            }
 
                                                         @if (!string.IsNullOrWhiteSpace(copy.Notes))
                                                         {
@@ -573,7 +586,7 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                                     @if (!string.IsNullOrWhiteSpace(copy.RemovalNotes))
                                                                     {
                                                                         <br />
-                                                                        <i>@copy.RemovalNotes</i>
+                                                                                <i>@copy.RemovalNotes</i>
                                                                     }
                                                                 </span>
                                                             </li>
@@ -581,18 +594,18 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
                                                     </ul>
 
                                                 </li>
-                                            }
+                                                                            }
                                         </ul>
-                                    }
+                                                                            }
                                 </li>
-                            }
-                        }
+                                                                                }
+                                                                            }
 
                     </ul>
-                }
+                                                                            }
 
             </td>
         </tr>
-                                                }
+                                                                            }
 
 </table>
