@@ -42,9 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MusicalEvents\MusicalEventListing.cs" />
+    <Compile Include="MusicalEvents\PerformanceListing.cs" />
+    <Compile Include="MusicalEvents\PerformerDetails.cs" />
     <Compile Include="People\PersonListing.cs" />
     <Compile Include="People\PersonDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PurchaseLocations\LocationBase.cs" />
     <Compile Include="PurchaseLocations\LocationDetails.cs" />
     <Compile Include="PurchaseLocations\LocationListing.cs" />
     <Compile Include="Releases\ElementDetails.cs" />

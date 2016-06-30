@@ -108,7 +108,7 @@ namespace MusicDatabase.Model
         #region Properties
         public Guid ID { get; set; }
         public int Position { get; set; }
-        public MusicalEntity MusicalEntity { get; set; }
+        public virtual MusicalEntity MusicalEntity { get; set; }
         #endregion
 
         #region Constructors

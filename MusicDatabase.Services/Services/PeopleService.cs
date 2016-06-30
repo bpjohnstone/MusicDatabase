@@ -18,7 +18,7 @@ namespace MusicDatabase.Services.Services
             Repositiory = repository;
         }
 
-        public IEnumerable<PersonListing> RetrievePeopleListingDetails()
+        public IEnumerable<PersonListing> RetrievePersonListings()
         {
             using (var context = new MusicDbContext())
             {

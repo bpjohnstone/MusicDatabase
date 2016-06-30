@@ -193,6 +193,7 @@
     <Content Include="Views\People\Index.cshtml" />
     <Content Include="Views\People\Details.cshtml" />
     <Content Include="Views\Locations\Index.cshtml" />
+    <Content Include="Views\Locations\Details.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

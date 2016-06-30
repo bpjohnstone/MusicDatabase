@@ -11,7 +11,7 @@ using System.Configuration;
 
 namespace MusicDatabase.EntityFramework
 {
-    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseIfModelChanges<MusicDbContext>
+    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseAlways<MusicDbContext>
     {
         protected override void Seed(MusicDbContext context)
         {
@@ -593,6 +593,12 @@ namespace MusicDatabase.EntityFramework
                         row["City"].ToString(),
                         row["State"].ToString(),
                         row["Country"].ToString());
+
+                    location.Address = row["Address"].ToString();
+                    location.Suburb = row["Suburb"].ToString();
+                    location.Postcode = row["Postcode"].ToString();
+
+                    location.Notes = row["Notes"].ToString();
 
                     // Group
                     if (!string.IsNullOrWhiteSpace(row["Group"].ToString()))

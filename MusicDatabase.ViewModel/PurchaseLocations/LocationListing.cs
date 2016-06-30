@@ -7,25 +7,10 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class LocationListing
+    public class LocationListing : LocationBase
     {
-        public Guid ID { get; set; }
-
-        public string Name { get; set; }
-        public string LocationGroup { get; set; }
-        public Guid? LocationGroupID { get; set; }
-        public string SortName { get; set; }
-
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Country { get; set; }
-
         [Display(Name="Musical Events")]
         public int MusicalEvents { get; set; }
-
         public int Purchases { get; set; }
-
-        [Display(Name="Closed")]
-        public bool IsClosed { get; set; }
     }
 }

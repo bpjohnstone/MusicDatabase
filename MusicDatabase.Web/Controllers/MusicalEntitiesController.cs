@@ -21,7 +21,7 @@ namespace MusicDatabase.Web.Controllers
             return View(db.Set<MusicalEntity>().OrderBy(e => e.SortName).ToList());
         }
 
-        // GET: MusicalEntities/Details/5
+        // GET: MusicalEntities/Details/e0424a11-fc69-4047-b543-e9967b044fad
         public ActionResult Details(Guid? id)
         {
             if (id == null)

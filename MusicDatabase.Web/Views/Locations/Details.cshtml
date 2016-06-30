@@ -1,0 +1,200 @@
+﻿@model MusicDatabase.ViewModel.LocationDetails
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>LocationDetails</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Name
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SortName)
+        </dd>
+
+        @if (Model.LocationGroupID != null)
+        {
+            <dt>
+                Group
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.LocationGroup)
+            </dd>
+        }
+
+        <dt>
+            Address
+        </dt>
+
+        <dd>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Address))
+            {
+                @Model.Address<br />
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.Suburb))
+            {
+                @Model.Suburb<br />
+            }
+
+            @Model.City<br />
+
+            @if ((!string.IsNullOrWhiteSpace(Model.State)) || (!string.IsNullOrWhiteSpace(Model.Postcode)))
+            {
+                if (!string.IsNullOrWhiteSpace(Model.State))
+                {
+                    <text>@Model.State </text>
+                }
+
+                if (!string.IsNullOrWhiteSpace(Model.Postcode))
+                {
+                    @Model.Postcode
+                }
+
+                <br />
+            }
+
+            @Model.Country
+
+        </dd>
+
+        @if (Model.IsClosed)
+        {
+            <dt>Status</dt>
+
+            <dd>
+                <i>Closed</i>
+            </dd>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <dt>
+                @Html.DisplayNameFor(model => model.Notes)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Notes)
+            </dd>
+        }
+
+        @if (Model.OtherNames.Count > 0)
+        {
+
+            <dt>
+                Also Known As
+            </dt>
+            <dd>
+                <ul>
+                    @foreach (var otherName in Model.OtherNames.OrderBy(n => n.Key))
+                    {
+                        <li>@otherName.Value</li>
+                    }
+                </ul>
+            </dd>
+        }
+
+    </dl>
+
+    @if (Model.MusicalEvents.Count > 0)
+    {
+        <h4>Events</h4>
+
+        <table>
+
+            @foreach (var eventListing in Model.MusicalEvents.OrderByDescending(e => e.EventDate))
+            {
+
+                <tr>
+                    <td style="padding-right: 20px;">
+                        @eventListing.EventDate.ToString("d MMMM yyyy")
+                    </td>
+                    <td>
+
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroup))
+                        {
+                            <text>@eventListing.EventGroup - </text>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventName))
+                        {
+                            <text>@eventListing.EventName - </text>
+                        }
+
+                        @{
+                            var count = eventListing.Headliners.Count();
+                            var current = 1;
+
+                            foreach (var headliner in eventListing.Headliners.OrderBy(p => p.Position))
+                            {
+                                if ((count > 1) && (current > 1))
+                                {
+                                    if (current != count)
+                                    {
+                                        <text>, </text>
+                                    }
+                                    else
+                                    {
+                                        <text> and </text>
+                                    }
+                                }
+
+
+                                var performerCount = headliner.Performers.Count();
+                                var performerIndex = 1;
+
+                                foreach (var performer in headliner.Performers.OrderBy(p => p.Position))
+                                {
+                                    if ((performerCount > 1) && (performerIndex > 1))
+                                    {
+                                        if (performerIndex == 2)
+                                        {
+                                            <text> performing with </text>
+                                        }
+                                        else if (performerIndex < performerCount)
+                                        {
+                                            @Html.Raw(", ");
+                                        }
+                                        else
+                                        {
+                                            <text> and </text>
+                                        }
+                                    }
+
+                                    @Html.ActionLink(performer.MusicalEntity, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null)
+
+                                    performerIndex++;
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(headliner.PerformingAs))
+                                {
+                                    <text> performing as <i>@headliner.PerformingAs</i></text>
+                                }
+
+                                current++;
+                            }
+
+                            if (count > 1)
+                            {
+                                <text> co-headlining</text>
+                            }
+                        }
+
+                    </td>
+                </tr>
+                            }
+        </table>
+
+                            }
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

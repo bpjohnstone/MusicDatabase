@@ -35,7 +35,7 @@
         <th></th>
     </tr>
 
-@foreach (var item in Model.OrderByDescending(l => l.MusicalEvents)) {
+@foreach (var item in Model.OrderByDescending(l => l.MusicalEvents).ThenBy(l => l.SortName)) {
     <tr>
         <td>
             @if(item.LocationGroup != null)

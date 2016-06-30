@@ -18,7 +18,7 @@ namespace MusicDatabase.Web.Controllers
         // GET: People
         public ActionResult Index()
         {
-            return View(Service.RetrievePeopleListingDetails());
+            return View(Service.RetrievePersonListings());
         }
 
         // GET: Details
