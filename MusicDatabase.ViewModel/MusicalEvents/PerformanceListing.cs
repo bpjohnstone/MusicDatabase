@@ -11,6 +11,7 @@ namespace MusicDatabase.ViewModel
         public int Position { get; set; }
         public List<PerformerDetails> Performers { get; set; }        
         public string PerformingAs { get; set; }
+        public bool Attended { get; set; }
 
         public PerformanceListing()
         {

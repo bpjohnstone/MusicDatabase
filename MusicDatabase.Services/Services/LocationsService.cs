@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
 using MusicDatabase.Services.Repositories;
@@ -13,9 +14,12 @@ namespace MusicDatabase.Services.Services
     public class LocationsService
     {
         private EntityRepository Repositiory;
-        public LocationsService(EntityRepository repository)
+        private IMapper Mapper;
+
+        public LocationsService(EntityRepository repository, IMapper mapper)
         {
             Repositiory = repository;
+            Mapper = mapper;
         }
 
         public IEnumerable<LocationListing> RetrieveLocationListings()
@@ -24,17 +28,8 @@ namespace MusicDatabase.Services.Services
 
             using (var context = new MusicDbContext())
             {
-                var locations = Repositiory.Query<Location>(context, EntityState.Active).ToList();                
-
-                foreach (var location in locations)
-                {
-                    var details = new LocationListing();
-                    PopulateLocationBase(location, details);
-                    details.MusicalEvents = location.MusicalEvents.Count(e => e is SingleDayEvent) + location.MusicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
-                    details.Purchases = location.Purchases.Count();
-
-                    result.Add(details);
-                }
+                var locations = Repositiory.Query<Location>(context, EntityState.Active).ToList();
+                locations.ForEach(l => result.Add(Mapper.Map<LocationListing>(l)));
             }
 
             return result;
@@ -67,6 +62,7 @@ namespace MusicDatabase.Services.Services
                         var eventListing = new MusicalEventListing();
                         eventListing.EventDate = musicalEvent.EventDate.Value;
 
+                        // Event Group
                         if(musicalEvent.EventGroup != null)
                         {
                             eventListing.EventGroup = musicalEvent.EventGroup.Name;
@@ -75,11 +71,31 @@ namespace MusicDatabase.Services.Services
 
                         eventListing.EventName = musicalEvent.EventName;
 
+                        //Location
+                        if(musicalEvent.Venue != null)
+                        {
+                            eventListing.VenueID = musicalEvent.Venue.ID;
+
+                            if (!string.IsNullOrWhiteSpace(musicalEvent.AlternateVenueName))
+                            {
+                                eventListing.VenueName = musicalEvent.AlternateVenueName;
+                            }
+                            else if (musicalEvent.Venue.LocationGroup != null)
+                            {
+                                eventListing.VenueName = string.Format("{0} - {1}", musicalEvent.Venue.LocationGroup.Name, musicalEvent.Venue.Name);
+                            }
+                            else
+                            {
+                                eventListing.VenueName = musicalEvent.Venue.Name;
+                            }
+                        }
+                        
                         // Headliners...
                         foreach(var headliner in musicalEvent.Lineup.OfType<Headliner>().OrderBy(h => h.Position))
                         {
                             var headlinerDetails = new PerformanceListing();
                             headlinerDetails.Position = headliner.Position.Value;
+                            headlinerDetails.Attended = headliner.Attended;
 
                             // Performers...
                             foreach(var performer in headliner.Performers)
@@ -114,7 +130,7 @@ namespace MusicDatabase.Services.Services
 
                 if (location.LocationGroup != null)
                 {
-                    locationBase.LocationGroup = location.LocationGroup.Name;
+                    locationBase.LocationGroupName = location.LocationGroup.Name;
                     locationBase.LocationGroupID = location.LocationGroup.ID;
                 }
 

@@ -25,7 +25,7 @@
             </dt>
 
             <dd>
-                @Html.DisplayFor(model => model.LocationGroup)
+                @Html.DisplayFor(model => model.LocationGroupName)
             </dd>
         }
 
@@ -119,11 +119,6 @@
                     </td>
                     <td>
 
-                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroup))
-                        {
-                            <text>@eventListing.EventGroup - </text>
-                        }
-
                         @if (!string.IsNullOrWhiteSpace(eventListing.EventName))
                         {
                             <text>@eventListing.EventName - </text>
@@ -176,7 +171,7 @@
 
                                 if (!string.IsNullOrWhiteSpace(headliner.PerformingAs))
                                 {
-                                    <text> performing as <i>@headliner.PerformingAs</i></text>
+                                    <text> (performing as <i>@headliner.PerformingAs</i>)</text>
                                 }
 
                                 current++;
@@ -186,6 +181,11 @@
                             {
                                 <text> co-headlining</text>
                             }
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroup))
+                        {
+                            <text>(@eventListing.EventGroup show)</text>
                         }
 
                     </td>

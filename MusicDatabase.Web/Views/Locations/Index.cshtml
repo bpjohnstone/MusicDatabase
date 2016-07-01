@@ -6,9 +6,6 @@
 
 <h2>Index</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
 <table class="table">
     <tr>
         <th>
@@ -38,12 +35,20 @@
 @foreach (var item in Model.OrderByDescending(l => l.MusicalEvents).ThenBy(l => l.SortName)) {
     <tr>
         <td>
-            @if(item.LocationGroup != null)
-            {
-                <text>@item.LocationGroup - </text>
-            }
+            @{ 
+                var locationName = string.Empty;
 
-            @Html.DisplayFor(modelItem => item.Name)
+                if(!string.IsNullOrWhiteSpace(item.LocationGroupName))
+                {
+                    locationName = string.Format("{0} - {1}", item.LocationGroupName, item.Name);
+                }
+                else
+                {
+                    locationName = item.Name;
+                }
+
+                @Html.ActionLink(locationName, "Details", new { ID = item.ID })
+            }
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.City)

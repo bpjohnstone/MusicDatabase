@@ -13,8 +13,15 @@ namespace MusicDatabase.Model
         public string Psuedonym { get; set; }
         public string Notes { get; set; }
 
-        // Concerts
+        // Events
         public virtual ICollection<MusicalEvent> EventsAttended { get; set; }
+        public int TotalEvents
+        {
+            get
+            {
+                return EventsAttended.Count(e => e is SingleDayEvent) + EventsAttended.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
+            }
+        }
 
         // Gifts
         public virtual ICollection<Copy> GiftsGiven { get; set; }

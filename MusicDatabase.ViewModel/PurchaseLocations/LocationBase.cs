@@ -12,7 +12,7 @@ namespace MusicDatabase.ViewModel
         public Guid ID { get; set; }
 
         public string Name { get; set; }
-        public string LocationGroup { get; set; }
+        public string LocationGroupName { get; set; }
         public Guid? LocationGroupID { get; set; }
         public string SortName { get; set; }
 

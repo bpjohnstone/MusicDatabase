@@ -11,7 +11,6 @@ namespace MusicDatabase.ViewModel
         public Guid ID { get; set; }
         public string Name { get; set; }
         public string Psuedonym { get; set; }
-
         public List<MusicalEventListing> EventsAttended { get; set; }
 
         public PersonDetails()

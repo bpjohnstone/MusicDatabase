@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
 using MusicDatabase.Services.Repositories;
@@ -13,31 +14,25 @@ namespace MusicDatabase.Services.Services
     public class PeopleService
     {
         private EntityRepository Repositiory;
-        public PeopleService(EntityRepository repository)
+        private IMapper Mapper;
+
+        public PeopleService(EntityRepository repository, IMapper mapper)
         {
             Repositiory = repository;
+            Mapper = mapper;
         }
 
         public IEnumerable<PersonListing> RetrievePersonListings()
         {
+            var result = new List<PersonListing>();
+
             using (var context = new MusicDbContext())
             {
                 var people = Repositiory.Query<Person>(context, EntityState.Active).ToList();
-                var result = new List<PersonListing>();
-
-                foreach(var person in people)
-                {
-                    var details = new PersonListing();
-                    details.ID = person.ID;
-                    details.Name = person.Name;
-                    details.Psuedonym = person.Psuedonym;
-                    details.EventsAttended = person.EventsAttended.Count(e => e is SingleDayEvent) + person.EventsAttended.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
-                    details.GiftsGiven = person.GiftsGiven.Count;
-                    result.Add(details);
-                }
-
-                return result;
+                people.ForEach(p => result.Add(Mapper.Map<PersonListing>(p)));
             }
+
+            return result;
         }
 
         public PersonDetails RetrievePersonDetails(Guid ID)
@@ -53,6 +48,64 @@ namespace MusicDatabase.Services.Services
                     result.ID = ID;
                     result.Name = person.Name;
                     result.Psuedonym = person.Psuedonym;
+
+                    foreach (var musicalEvent in person.EventsAttended)
+                    {
+                        var eventListing = new MusicalEventListing();
+                        eventListing.EventDate = musicalEvent.EventDate.Value;
+
+                        // Event Group
+                        if (musicalEvent.EventGroup != null)
+                        {
+                            eventListing.EventGroup = musicalEvent.EventGroup.Name;
+                            eventListing.EventGroupID = musicalEvent.EventGroup.ID;
+                        }
+
+                        eventListing.EventName = musicalEvent.EventName;
+
+                        //Location
+                        if (musicalEvent.Venue != null)
+                        {
+                            eventListing.VenueID = musicalEvent.Venue.ID;
+
+                            if (!string.IsNullOrWhiteSpace(musicalEvent.AlternateVenueName))
+                            { 
+                                eventListing.VenueName = musicalEvent.AlternateVenueName;
+                            }
+                            else if(musicalEvent.Venue.LocationGroup != null)
+                            {
+                                eventListing.VenueName = string.Format("{0} - {1}", musicalEvent.Venue.LocationGroup.Name, musicalEvent.Venue.Name);
+                            }
+                            else
+                            {
+                                eventListing.VenueName = musicalEvent.Venue.Name;
+                            }
+                        }
+
+                        // Headliners...
+                        foreach (var headliner in musicalEvent.Lineup.OfType<Headliner>().OrderBy(h => h.Position))
+                        {
+                            var headlinerDetails = new PerformanceListing();
+                            headlinerDetails.Position = headliner.Position.Value;
+                            headlinerDetails.Attended = headliner.Attended;
+
+                            // Performers...
+                            foreach (var performer in headliner.Performers)
+                            {
+                                var performerDetails = new PerformerDetails();
+                                performerDetails.Position = performer.Position;
+                                performerDetails.MusicalEntity = performer.MusicalEntity.Name;
+                                performerDetails.MusicalEntityID = performer.MusicalEntity.ID;
+                                headlinerDetails.Performers.Add(performerDetails);
+                            }
+
+                            headlinerDetails.PerformingAs = headliner.PerformingAs;
+
+                            eventListing.Headliners.Add(headlinerDetails);
+                        }
+
+                        result.EventsAttended.Add(eventListing);
+                    }
                 }
             }
 

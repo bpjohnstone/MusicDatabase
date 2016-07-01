@@ -16,6 +16,9 @@ namespace MusicDatabase.ViewModel
 
         public string EventName { get; set; }
 
+        public string VenueName { get; set; }
+        public Guid VenueID { get; set; }
+
         public List<PerformanceListing> Headliners { get; set; }
 
         public MusicalEventListing()

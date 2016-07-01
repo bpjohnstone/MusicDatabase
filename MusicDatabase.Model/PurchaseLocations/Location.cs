@@ -35,6 +35,14 @@ namespace MusicDatabase.Model
         public string Notes { get; set; }
 
         public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }    // Collection of Concerts / Festivals
+        public int TotalEvents
+        {
+            get
+            {
+                return MusicalEvents.Count(e => e is SingleDayEvent) + MusicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
+            }
+        }
+
         public virtual ICollection<Copy> Purchases { get; set; }                // Collection of Purchases
         
         public bool IsClosed { get; set; }

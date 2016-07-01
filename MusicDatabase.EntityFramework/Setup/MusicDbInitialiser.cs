@@ -11,7 +11,7 @@ using System.Configuration;
 
 namespace MusicDatabase.EntityFramework
 {
-    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseAlways<MusicDbContext>
+    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseIfModelChanges<MusicDbContext>
     {
         protected override void Seed(MusicDbContext context)
         {

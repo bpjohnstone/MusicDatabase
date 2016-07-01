@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<MusicDatabase.ViewModel.PersonListing>
 
 @{
-    ViewBag.Title = "View";
+    ViewBag.Title = "Listing";
 }
 
-<h2>View</h2>
+<h2>Listing</h2>
 
 <table class="table">
     <tr>
@@ -23,7 +23,7 @@
 @foreach (var item in Model.OrderByDescending(p => p.EventsAttended).ThenBy(p => p.Name)) {
     <tr>
         <td>
-            @Html.DisplayFor(modelItem => item.Name)
+            @Html.ActionLink(item.Name, "Details", new { ID = item.ID})
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.EventsAttended)
@@ -32,9 +32,7 @@
             @Html.DisplayFor(modelItem => item.GiftsGiven)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
+            @Html.ActionLink("Details", "Details", new { id=item.ID }) 
         </td>
     </tr>
 }

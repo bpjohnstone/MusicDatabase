@@ -27,8 +27,107 @@
         </dd>
 
     </dl>
+
+
+    @if (Model.EventsAttended.Count > 0)
+    {
+        <h4>Events</h4>
+
+        <table>
+
+            @foreach (var eventListing in Model.EventsAttended.OrderByDescending(e => e.EventDate))
+            {
+
+                <tr>
+                    <td style="padding-right: 20px;">
+                        @eventListing.EventDate.ToString("d MMMM yyyy")
+                    </td>
+                    <td style="padding-right: 20px;">
+
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventName))
+                        {
+                            <text>@eventListing.EventName - </text>
+                        }
+
+                        @{
+                            var count = eventListing.Headliners.Count();
+                            var current = 1;
+
+                            foreach (var headliner in eventListing.Headliners.OrderBy(p => p.Position))
+                            {
+                                if ((count > 1) && (current > 1))
+                                {
+                                    if (current != count)
+                                    {
+                                        <text>, </text>
+                                    }
+                                    else
+                                    {
+                                        <text> and </text>
+                                    }
+                                }
+
+
+                                var performerCount = headliner.Performers.Count();
+                                var performerIndex = 1;
+
+                                foreach (var performer in headliner.Performers.OrderBy(p => p.Position))
+                                {
+                                    if ((performerCount > 1) && (performerIndex > 1))
+                                    {
+                                        if (performerIndex == 2)
+                                        {
+                                            <text> performing with </text>
+                                        }
+                                        else if (performerIndex < performerCount)
+                                        {
+                                            @Html.Raw(", ");
+                                        }
+                                        else
+                                        {
+                                            <text> and </text>
+                                        }
+                                    }
+
+                                    @Html.ActionLink(performer.MusicalEntity, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null)
+
+                                    performerIndex++;
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(headliner.PerformingAs))
+                                {
+                                    <text> (performing as <i>@headliner.PerformingAs</i>)</text>
+                                }
+
+                                current++;
+                            }
+
+                            if (count > 1)
+                            {
+                                <text> co-headlining</text>
+                            }
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroup))
+                        {
+                            <text>(@eventListing.EventGroup show)</text>
+                        }
+
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(eventListing.VenueName))
+                        {
+                            @Html.ActionLink(eventListing.VenueName, "Details", "Locations", new { ID = eventListing.VenueID }, null)
+                        }
+                    </td>
+                </tr>
+                            }
+        </table>
+
+                            }
+
+
 </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
     @Html.ActionLink("Back to List", "Index")
 </p>
