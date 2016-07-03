@@ -214,6 +214,7 @@
     <Compile Include="Controllers\FormatsController.cs" />
     <Compile Include="Controllers\LocationsController.cs" />
     <Compile Include="Controllers\MusicalEntitiesController.cs" />
+    <Compile Include="Controllers\MusicalEventsController.cs" />
     <Compile Include="Controllers\PeopleController.cs" />
     <Compile Include="Controllers\ReleasesController.cs" />
     <Compile Include="Global.asax.cs">
@@ -223,6 +224,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Formats\" />
+    <Folder Include="Views\MusicalEvents\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MusicDatabase.EntityFramework\MusicDatabase.EntityFramework.csproj">

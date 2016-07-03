@@ -6,16 +6,26 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class PerformanceListing
+    public class PerformanceDetails
     {
         public int Position { get; set; }
         public List<PerformerDetails> Performers { get; set; }        
         public string PerformingAs { get; set; }
         public bool Attended { get; set; }
 
-        public PerformanceListing()
+        public PerformanceDetails()
         {
             Performers = new List<PerformerDetails>();
         }
+    }
+
+    public class HeadlinerDetails : PerformanceDetails
+    {
+
+    }
+
+    public class SupportDetails : PerformanceDetails
+    {
+
     }
 }

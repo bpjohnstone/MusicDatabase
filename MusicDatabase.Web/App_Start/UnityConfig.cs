@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AutoMapper;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
@@ -48,18 +49,44 @@ namespace MusicDatabase.Web.App_Start
                     .ForMember(dest => dest.EventsAttended,
                             opts => opts.MapFrom(
                                 src => src.TotalEvents));
-                
+
+                cfg.CreateMap<Person, PersonDetails>();                
 
                 cfg.CreateMap<Location, LocationListing>()
-                    .ForMember(dest => dest.SortName,
-                            opts => opts.MapFrom(
-                                src => src.SearchName))
                     .ForMember(dest => dest.MusicalEvents,
                             opts => opts.MapFrom(
                                 src => src.TotalEvents))
                     .ForMember(dest => dest.Purchases,
                             opts => opts.MapFrom(
                                 src => src.Purchases.Count));
+
+                cfg.CreateMap<Location, LocationDetails>()
+                    .ForMember(dest => dest.OtherNames,
+                            opts => opts.Ignore())
+                    .AfterMap((src, dest) =>
+                    {
+                        foreach(var name in src.OtherNames)
+                            dest.OtherNames.Add(name.Position, name.Name);
+                    });
+
+                cfg.CreateMap<MusicalEvent, MusicalEventListing>()
+                    .Include<SingleDayEvent, SingleDayEventListing>()
+                    .Include<Concert, ConcertListing>()
+                    .Include<Festival, FestivalListing>()
+                    .Include<MultiDayFestival, MultiDayFestivalListing>()
+                    .ForMember(dest => dest.Headliners,
+                            opts => opts.MapFrom(
+                                src => src.Lineup.OfType<Headliner>()));
+
+                cfg.CreateMap<SingleDayEvent, SingleDayEventListing>();
+                cfg.CreateMap<Concert, ConcertListing>();
+                cfg.CreateMap<Festival, FestivalListing>();
+                cfg.CreateMap<MultiDayFestival, MultiDayFestivalListing>();
+                
+                cfg.CreateMap<Headliner, HeadlinerDetails>();
+                cfg.CreateMap<Support, SupportDetails>();
+                cfg.CreateMap<Performance, PerformanceDetails>();
+                cfg.CreateMap<Performer, PerformerDetails>();
             });
 
             // TODO: Register your types here

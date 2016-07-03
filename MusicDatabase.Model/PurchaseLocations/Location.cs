@@ -12,7 +12,7 @@ namespace MusicDatabase.Model
         public string Name { get; set; }
         public virtual LocationGroup LocationGroup { get; set; }
 
-        public string SearchName
+        public string SortName
         {
             get
             {

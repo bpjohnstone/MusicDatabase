@@ -15,15 +15,12 @@ namespace MusicDatabase.ViewModel
         public string Notes { get; set; }
 
         public Dictionary<int, string> OtherNames { get; set; }
-
         public List<MusicalEventListing> MusicalEvents { get; set; }
-        
         // Purchases
 
         public LocationDetails()
         {
             OtherNames = new Dictionary<int, string>();
-            MusicalEvents = new List<MusicalEventListing>();
         }
     }
 }

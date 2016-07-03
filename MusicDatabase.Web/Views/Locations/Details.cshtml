@@ -164,7 +164,7 @@
                                         }
                                     }
 
-                                    @Html.ActionLink(performer.MusicalEntity, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null)
+                                    @Html.ActionLink(performer.MusicalEntityName, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null)
 
                                     performerIndex++;
                                 }
@@ -183,9 +183,9 @@
                             }
                         }
 
-                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroup))
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroupName))
                         {
-                            <text>(@eventListing.EventGroup show)</text>
+                            <text>(@eventListing.EventGroupName show)</text>
                         }
 
                     </td>

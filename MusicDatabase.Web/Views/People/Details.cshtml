@@ -89,7 +89,7 @@
                                         }
                                     }
 
-                                    @Html.ActionLink(performer.MusicalEntity, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null)
+                                    @Html.ActionLink(performer.MusicalEntityName, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null)
 
                                     performerIndex++;
                                 }
@@ -108,9 +108,24 @@
                             }
                         }
 
-                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroup))
+                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroupName))
                         {
-                            <text>(@eventListing.EventGroup show)</text>
+                            <text>(@eventListing.EventGroupName</text>
+
+                            if(eventListing is MusicDatabase.ViewModel.ConcertListing)
+                            {
+                                <text> show)</text>
+                            }
+                            else if (eventListing is MusicDatabase.ViewModel.FestivalListing)
+                            {
+                                <text> festival)</text>
+                                <span style="color: red; font-size: 10px; font-weight: bold;">[Festival]</span>
+                            }
+                            else if (eventListing is MusicDatabase.ViewModel.MultiDayFestivalListing)
+                            {
+                                <text> festival)</text>
+                                <span style="color: maroon; font-size: 10px; font-weight: bold;">[Multi-Day Festival]</span>
+                            }
                         }
 
                     </td>
@@ -118,6 +133,12 @@
                         @if (!string.IsNullOrWhiteSpace(eventListing.VenueName))
                         {
                             @Html.ActionLink(eventListing.VenueName, "Details", "Locations", new { ID = eventListing.VenueID }, null)
+
+                            if (!string.IsNullOrWhiteSpace(eventListing.VenueCity))
+                            {
+                                @Html.Raw(", ")
+                                @eventListing.VenueCity
+                            }
                         }
                     </td>
                 </tr>

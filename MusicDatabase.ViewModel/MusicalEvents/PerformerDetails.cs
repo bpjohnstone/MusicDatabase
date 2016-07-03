@@ -9,7 +9,7 @@ namespace MusicDatabase.ViewModel
     public class PerformerDetails
     {
         public int Position { get; set; }
-        public string MusicalEntity { get; set; }
+        public string MusicalEntityName { get; set; }
         public Guid MusicalEntityID { get; set; }
     }
 }

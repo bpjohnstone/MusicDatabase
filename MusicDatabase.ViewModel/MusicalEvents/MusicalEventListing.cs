@@ -11,19 +11,39 @@ namespace MusicDatabase.ViewModel
         public Guid ID { get; set; }
         public DateTime EventDate { get; set; }
         
-        public string EventGroup { get; set; }
+        public string EventGroupName { get; set; }
         public Guid EventGroupID { get; set; }
 
         public string EventName { get; set; }
 
         public string VenueName { get; set; }
         public Guid VenueID { get; set; }
+        public string VenueCity { get; set; }
 
-        public List<PerformanceListing> Headliners { get; set; }
+        public List<HeadlinerDetails> Headliners { get; set; }
 
         public MusicalEventListing()
         {
-            Headliners = new List<PerformanceListing>();
+            Headliners = new List<HeadlinerDetails>();
         }
+    }
+
+    public abstract class SingleDayEventListing : MusicalEventListing
+    {
+    }
+
+    public class ConcertListing : SingleDayEventListing
+    {
+
+    }
+
+    public class FestivalListing : SingleDayEventListing
+    {
+
+    }
+
+    public class MultiDayFestivalListing : MusicalEventListing
+    {
+
     }
 }

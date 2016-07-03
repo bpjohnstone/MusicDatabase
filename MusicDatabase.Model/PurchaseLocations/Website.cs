@@ -13,7 +13,7 @@ namespace MusicDatabase.Model
         public string Address { get; set; }
         public virtual WebsiteGroup WebsiteGroup { get; set; }
 
-        public string SearchName
+        public string SortName
         {
             get
             {
