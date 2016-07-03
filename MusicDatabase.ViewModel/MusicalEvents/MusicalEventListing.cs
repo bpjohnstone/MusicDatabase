@@ -6,20 +6,9 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class MusicalEventListing
+    public class MusicalEventListing : MusicalEventBase
     {
-        public Guid ID { get; set; }
-        public DateTime EventDate { get; set; }
-        
-        public string EventGroupName { get; set; }
-        public Guid EventGroupID { get; set; }
-
-        public string EventName { get; set; }
-
-        public string VenueName { get; set; }
-        public Guid VenueID { get; set; }
-        public string VenueCity { get; set; }
-
+        // Headliners
         public List<HeadlinerDetails> Headliners { get; set; }
 
         public MusicalEventListing()
@@ -30,6 +19,7 @@ namespace MusicDatabase.ViewModel
 
     public abstract class SingleDayEventListing : MusicalEventListing
     {
+
     }
 
     public class ConcertListing : SingleDayEventListing

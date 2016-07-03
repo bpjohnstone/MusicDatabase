@@ -16,25 +16,34 @@ namespace MusicDatabase.Web.Controllers
     {
         private MusicDbContext db = new MusicDbContext();
 
+        private MusicalEntitiesService Service;
+        public MusicalEntitiesController(MusicalEntitiesService service)
+        {
+            Service = service;
+        }
+
         // GET: MusicalEntities
         public ActionResult Index()
         {
-            return View(db.Set<MusicalEntity>().OrderBy(e => e.SortName).ToList());
+            return View(Service.RetrieveMusicalEntityListings());
         }
 
         // GET: MusicalEntities/Details/e0424a11-fc69-4047-b543-e9967b044fad
-        public ActionResult Details(Guid? id)
+        public ActionResult Details(Guid? ID)
         {
-            if (id == null)
+            ActionResult result = null;
+
+            if (ID.HasValue)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var musicalEntity = Service.RetrieveMusicalEntityDetails(ID.Value);
+                if (musicalEntity != null)
+                    result = View(musicalEntity);
             }
-            MusicalEntity musicalEntity = db.Set<MusicalEntity>().Find(id);
-            if (musicalEntity == null)
-            {
-                return HttpNotFound();
-            }
-            return View(musicalEntity);
+
+            if (result == null)
+                result = RedirectToAction("Index");
+
+            return result;
         }
 
         //// GET: MusicalEntities/Create

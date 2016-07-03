@@ -29,6 +29,7 @@ namespace MusicDatabase.Model
         #endregion
     }
 
+    // Used to group MultiDayFestival Days together, e.g. Splendour 2011, Splendour 2010 and Apollo Bay Music Festival
     public class MultiDayFestivalGroup : AbstractGroup
     {
         #region Properties

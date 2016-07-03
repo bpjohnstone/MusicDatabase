@@ -16,6 +16,7 @@ namespace MusicDatabase.ViewModel
 
         public Dictionary<int, string> OtherNames { get; set; }
         public List<MusicalEventListing> MusicalEvents { get; set; }
+
         // Purchases
 
         public LocationDetails()

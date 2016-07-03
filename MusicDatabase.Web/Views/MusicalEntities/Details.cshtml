@@ -1,4 +1,4 @@
-﻿@model MusicDatabase.Model.MusicalEntity
+﻿@model MusicDatabase.ViewModel.MusicalEntityDetails
 
 @{
     ViewBag.Title = "Details";
@@ -18,44 +18,55 @@
             @Html.DisplayFor(model => model.Name)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.SortName)
-        </dt>
+        @if (Model.Name != Model.SortName)
+        {
+            <dt>
+                @Html.DisplayNameFor(model => model.SortName)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.SortName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.DateCreated)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.DateCreated)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.LastUpdated)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.LastUpdated)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-
+            <dd>
+                @Html.DisplayFor(model => model.SortName)
+            </dd>
+        }
     </dl>
 </div>
 
-<b>Performances</b>
+@if (Model.Performances.Count > 0)
+{
+    <h4>Performances</h4>
 
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+    <table>
+        @foreach (var performance in Model.Performances.OrderByDescending(p => p.EventDate))
+        {
+            <tr>
+                <td style="padding-right: 20px;">@performance.EventDate.ToString("d MMMM yyyy")</td>
+                <td style="padding-right: 20px;">
+                    @if (performance.VenueID != null)
+                    {
+                        @Html.ActionLink(performance.VenueName, "Details", "Locations", new { ID = performance.VenueID }, null)
+                        if (!string.IsNullOrWhiteSpace(performance.VenueCity))
+                        {
+                            @Html.Raw(", ")
+                            @performance.VenueCity
+                        }
+                    }
+                </td>
+                <td>
+                    @if(performance.Performers.Count(p => p.MusicalEntityID != Model.ID) > 1)
+                    {
+
+                    }
+
+                    @if(!string.IsNullOrWhiteSpace(performance.PerformingAs))
+                    {
+                        <text>Performing as <i>@performance.PerformingAs</i>.</text>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+    <p>
+        @Html.ActionLink("Back to List", "Index")
+    </p>

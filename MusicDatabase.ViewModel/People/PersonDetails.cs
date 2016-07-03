@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class PersonDetails
+    public class PersonDetails : PersonBase
     {
-        public Guid ID { get; set; }
-        public string Name { get; set; }
-        public string Psuedonym { get; set; }
         public List<MusicalEventListing> EventsAttended { get; set; }
 
         public PersonDetails()

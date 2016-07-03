@@ -1,11 +1,33 @@
-﻿@model IEnumerable<MusicalEntity>
-@using MusicDatabase.Model
+﻿@model IEnumerable<MusicDatabase.ViewModel.MusicalEntityListing>
 
 @{
     ViewBag.Title = "Index";
 }
 
-@helper CreateMusicalEntityList(IEnumerable<MusicalEntity> musicalEntities)
+<h2>Index</h2>
+
+<table class="table">
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.SortName)</th>
+        <th>@Html.DisplayNameFor(model => model.Name)</th>
+        <th>@Html.DisplayNameFor(model => model.Releases)</th>
+        <th>@Html.DisplayNameFor(model => model.Performances)</th>
+    </tr>
+
+    @foreach (var item in Model.OrderBy(e => e.SortName))
+    {
+        <tr>
+            <td>@Html.ActionLink(item.SortName, "Details", new { ID = item.ID })</td>
+            <td>@item.Name</td>
+            <td>@item.Releases</td>
+            <td>@item.Performances</td>
+        </tr>
+    }
+
+</table>
+
+
+@*@helper CreateMusicalEntityList(IEnumerable<MusicalEntity> musicalEntities)
 {
 var count = musicalEntities.Count();
 var index = 1;
@@ -608,4 +630,4 @@ var linkText = displaySortName ? musicalEntity.SortName : musicalEntity.Name;
         </tr>
                                                                             }
 
-</table>
+</table>*@

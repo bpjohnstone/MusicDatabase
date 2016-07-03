@@ -41,9 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums.cs" />
+    <Compile Include="MusicalEntities\MusicalEntityBase.cs" />
+    <Compile Include="MusicalEntities\MusicalEntityDetails.cs" />
+    <Compile Include="MusicalEntities\MusicalEntityListing.cs" />
+    <Compile Include="MusicalEvents\MusicalEntityPerformanceListing.cs" />
+    <Compile Include="MusicalEvents\MusicalEventBase.cs" />
     <Compile Include="MusicalEvents\MusicalEventListing.cs" />
-    <Compile Include="MusicalEvents\PerformanceListing.cs" />
+    <Compile Include="MusicalEvents\PerformanceDetails.cs" />
     <Compile Include="MusicalEvents\PerformerDetails.cs" />
+    <Compile Include="People\PersonBase.cs" />
     <Compile Include="People\PersonListing.cs" />
     <Compile Include="People\PersonDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -54,9 +61,7 @@
     <Compile Include="Releases\ReleaseByYear.cs" />
     <Compile Include="Releases\ReleaseDetails.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MusicalEntities\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

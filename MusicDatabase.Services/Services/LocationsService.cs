@@ -6,21 +6,16 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
+using MusicDatabase.Services.Interfaces;
 using MusicDatabase.Services.Repositories;
 using MusicDatabase.ViewModel;
 
 namespace MusicDatabase.Services
 {
-    public class LocationsService
+    public class LocationsService : BaseService
     {
-        private EntityRepository Repositiory;
-        private IMapper Mapper;
-
-        public LocationsService(EntityRepository repository, IMapper mapper)
-        {
-            Repositiory = repository;
-            Mapper = mapper;
-        }
+        public LocationsService(IRepository repository, IMapper mapper)
+            :base(repository, mapper) { }
 
         public IEnumerable<LocationListing> RetrieveLocationListings()
         {

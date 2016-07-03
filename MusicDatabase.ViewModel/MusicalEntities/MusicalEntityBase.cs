@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class PersonListing : PersonBase
+    public abstract class MusicalEntityBase
     {
-        [Display(Name="Events Attended")]
-        public int EventsAttended { get; set; }
+        public Guid ID { get; set; }
+        public string Name { get; set; }
 
-        [Display(Name="Gifts Given")]
-        public int GiftsGiven { get; set; }
+        [Display(Name="Sort Name")]
+        public string SortName { get; set; }
     }
 }

@@ -6,21 +6,16 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
+using MusicDatabase.Services.Interfaces;
 using MusicDatabase.Services.Repositories;
 using MusicDatabase.ViewModel;
 
 namespace MusicDatabase.Services
 {
-    public class PeopleService
+    public class PeopleService : BaseService
     {
-        private EntityRepository Repositiory;
-        private IMapper Mapper;
-
-        public PeopleService(EntityRepository repository, IMapper mapper)
-        {
-            Repositiory = repository;
-            Mapper = mapper;
-        }
+        public PeopleService(IRepository repository, IMapper mapper)
+            :base(repository, mapper) { }
 
         public IEnumerable<PersonListing> RetrievePersonListings()
         {
