@@ -44,6 +44,7 @@ namespace MusicDatabase.Web.App_Start
             // AutoMapper Setup
             var config = new MapperConfiguration(cfg =>
             {
+                // Generic Mapping, so empty Guids can be replaced with Nulls
                 cfg.CreateMap<Guid, Guid?>().ConvertUsing(src => 
                 {
                     if (src == Guid.Empty)
@@ -52,55 +53,68 @@ namespace MusicDatabase.Web.App_Start
                         return src;
                 });
 
+                // Musical Entities
                 cfg.CreateMap<MusicalEntity, MusicalEntityListing>()
-                    .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Count()))
-                    .ForMember(dest => dest.Releases, opts => opts.MapFrom(src => src.Discography.Count()));
+                    .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Count))
+                    .ForMember(dest => dest.Releases, opts => opts.MapFrom(src => src.Discography.Count));
 
-                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>();
+                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>()
+                    .ForMember(dest => dest.Performances, opts => opts.Ignore());
 
+                // People
+                cfg.CreateMap<Person, PersonBasic>();
                 cfg.CreateMap<Person, PersonListing>()
-                    .ForMember(dest => dest.GiftsGiven, opts => opts.MapFrom(src => src.GiftsGiven.Count))
-                    .ForMember(dest => dest.EventsAttended, opts => opts.MapFrom(src => src.TotalEvents));
+                    .ForMember(dest => dest.EventsAttended, opts => opts.MapFrom(src => src.EventsAttended.Count))
+                    .ForMember(dest => dest.GiftsGiven, opts => opts.MapFrom(src => src.GiftsGiven.Count));
+                cfg.CreateMap<Person, PersonDetails>();
 
-                cfg.CreateMap<Person, PersonDetails>();          
-
+                // Locations
                 cfg.CreateMap<Location, LocationListing>()
-                    .ForMember(dest => dest.MusicalEvents, opts => opts.MapFrom(src => src.TotalEvents))
+                    .ForMember(dest => dest.MusicalEvents, opts => opts.MapFrom(src => src.MusicalEvents.Count))
                     .ForMember(dest => dest.Purchases, opts => opts.MapFrom(src => src.Purchases.Count));
-
                 cfg.CreateMap<Location, LocationDetails>()
                     .ForMember(dest => dest.OtherNames, opts => opts.Ignore())
-                    .AfterMap((src, dest) =>
-                    {
-                        foreach(var name in src.OtherNames)
+                    .AfterMap((src, dest) => 
+                    { 
+                        foreach (var name in src.OtherNames)
                             dest.OtherNames.Add(name.Position, name.Name);
                     });
 
-                cfg.CreateMap<MusicalEvent, MusicalEventListing>()
-                    .Include<SingleDayEvent, SingleDayEventListing>()
-                    .Include<Concert, ConcertListing>()
-                    .Include<Festival, FestivalListing>()
-                    .Include<MultiDayFestival, MultiDayFestivalListing>()
-                    .ForMember(dest => dest.Headliners, opts => opts.MapFrom(src => src.Lineup.OfType<Headliner>()));
+                // Musical Events
+                cfg.CreateMap<MusicalEvent, MusicalEventBase>()
+                    .Include<MusicalEvent, MusicalEventListing>()
+                    .Include<MusicalEvent, MusicalEventByLocation>()
+                    .Include<MusicalEvent, MusicalEventByMusicalEntity>()
+                    .ForMember(dest => dest.EventType, opts => opts.ResolveUsing(src =>
+                        {
+                            var eventType = EventType.Concert;
 
-                cfg.CreateMap<SingleDayEvent, SingleDayEventListing>();
-                cfg.CreateMap<Concert, ConcertListing>();
-                cfg.CreateMap<Festival, FestivalListing>();
-                cfg.CreateMap<MultiDayFestival, MultiDayFestivalListing>();
-                
-                cfg.CreateMap<Headliner, HeadlinerDetails>();
-                cfg.CreateMap<Support, SupportDetails>();
+                            if (src is Festival)
+                                eventType = EventType.Festival;
+                            else if (src is MultiDayFestival)
+                                eventType = EventType.MultiDayFestival;
+
+                            return eventType;
+                        }));
+
+                cfg.CreateMap<MusicalEvent, MusicalEventSimple>()
+                    .Include<MusicalEvent, MusicalEventListing>()
+                    .ForMember(dest => dest.VenueName, opts => opts.MapFrom(src =>
+                            !string.IsNullOrWhiteSpace(src.AlternateVenueName)
+                                ? src.AlternateVenueName
+                                : src.Venue.SortName
+                        ));
+
+                cfg.CreateMap<MusicalEvent, MusicalEventListing>()
+                    .ForMember(dest => dest.Headliners, opts => opts.MapFrom(src => src.Lineup.OfType<Headliner>()));
+                cfg.CreateMap<MusicalEvent, MusicalEventByLocation>()
+                    .ForMember(dest => dest.Headliners, opts => opts.MapFrom(src => src.Lineup.OfType<Headliner>()));
+                cfg.CreateMap<MusicalEvent, MusicalEventByMusicalEntity>();
+
+                // Musical Events - Performances and Performers
                 cfg.CreateMap<Performance, PerformanceDetails>();
                 cfg.CreateMap<Performer, PerformerDetails>();
 
-                cfg.CreateMap<Performance, MusicalEntityPerformanceListing>()
-                    .ForMember(dest => dest.EventDate, opts => opts.MapFrom(src => src.Event.EventDate))
-                    .ForMember(dest => dest.EventName, opts => opts.MapFrom(src => src.Event.EventName))
-                    .ForMember(dest => dest.EventGroupID, opts => opts.MapFrom(src => src.Event.EventGroup.ID))
-                    .ForMember(dest => dest.EventGroupName, opts => opts.MapFrom(src => src.Event.EventGroup.Name))
-                    .ForMember(dest => dest.VenueID, opts => opts.MapFrom(src => src.Event.Venue.ID))
-                    .ForMember(dest => dest.VenueName, opts => opts.MapFrom(src => !string.IsNullOrWhiteSpace(src.Event.AlternateVenueName) ? src.Event.AlternateVenueName : src.Event.Venue.SortName))
-                    .ForMember(dest => dest.VenueCity, opts => opts.MapFrom(src => src.Event.Venue.City));
             });
 
             // TODO: Register your types here

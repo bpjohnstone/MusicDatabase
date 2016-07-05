@@ -1,4 +1,5 @@
 ﻿@model MusicDatabase.ViewModel.LocationDetails
+@using MusicDatabase.ViewModel
 
 @{
     ViewBag.Title = "Details";
@@ -103,7 +104,7 @@
         }
 
     </dl>
-
+    
     @if (Model.MusicalEvents.Count > 0)
     {
         <h4>Events</h4>
@@ -118,6 +119,22 @@
                         @eventListing.EventDate.ToString("d MMMM yyyy")
                     </td>
                     <td>
+                        @if(eventListing.EventType != EventType.Concert)
+                        {
+                            <text>@eventListing.EventGroupName </text>
+
+                            switch (eventListing.EventType)
+                            {
+                                case EventType.Festival:
+                                    <span style="font-weight: bold; font-size: 10px; color: red;">[Festival]</span>
+                                    break;
+                                case EventType.MultiDayFestival:
+                                    <span style="font-weight: bold; font-size: 10px; color: maroon;">[Multi-Day Festival]</span>
+                                    break;
+                            }
+
+                            <text> - </text>
+                        }
 
                         @if (!string.IsNullOrWhiteSpace(eventListing.EventName))
                         {
@@ -183,17 +200,73 @@
                             }
                         }
 
-                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroupName))
+                        @if ((eventListing.EventType == EventType.Concert) && (!string.IsNullOrWhiteSpace(eventListing.EventGroupName)))
                         {
-                            <text>(@eventListing.EventGroupName show)</text>
+                            <text>(@eventListing.EventGroupName)</text>
                         }
+
+
 
                     </td>
                 </tr>
-                            }
+            }
         </table>
+    }
 
-                            }
+    @*@if(Model.Purchases.Count > 0)
+    {
+        <h4>Purchases</h4>
+
+        <table>
+            @foreach (var purchase in Model.Purchases.OrderByDescending(p => p.DateAdded))
+            {
+                <tr>
+                    <td style="padding-right: 20px;">
+                        @if (purchase.DateAdded.HasValue)
+                        {
+                            <text>@purchase.DateAdded.Value.ToString("d MMMM yyyy")</text>
+                        }
+                    </td>
+                    <td style="padding-right: 20px;">
+                        @purchase.ReleaseTitle (@purchase.ReleaseYear)
+                    </td>
+                    <td>
+                        @{
+                                    if(purchase.Elements.Count > 0)
+                                    {
+                                        var current = 1;
+                                        foreach(var element in purchase.Elements.OrderBy(e => e.Position))
+                                        {
+                                            if(current > 1)
+                                            {
+                                        <text> + </text>
+                                            }
+
+                                            if(element.Count > 1)
+                                            {
+                                        <text>@element.Count@element.FormatCode</text>
+                                            }
+                                            else
+                                            {
+                                        <text>@element.FormatCode</text>
+                                            }
+
+                                            current++;
+                                        }
+                                    }
+                                }
+
+                                @foreach(var element in purchase.Elements.OrderBy(e => e.Position))
+                        {
+
+
+                                }
+                    </td>
+                </tr>
+            }
+        </table>
+    }*@
+
 </div>
 <p>
     @Html.ActionLink("Back to List", "Index")

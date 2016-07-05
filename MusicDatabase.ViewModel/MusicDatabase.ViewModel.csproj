@@ -42,21 +42,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
-    <Compile Include="MusicalEntities\MusicalEntityBase.cs" />
-    <Compile Include="MusicalEntities\MusicalEntityDetails.cs" />
-    <Compile Include="MusicalEntities\MusicalEntityListing.cs" />
-    <Compile Include="MusicalEvents\MusicalEntityPerformanceListing.cs" />
-    <Compile Include="MusicalEvents\MusicalEventBase.cs" />
-    <Compile Include="MusicalEvents\MusicalEventListing.cs" />
-    <Compile Include="MusicalEvents\PerformanceDetails.cs" />
-    <Compile Include="MusicalEvents\PerformerDetails.cs" />
-    <Compile Include="People\PersonBase.cs" />
-    <Compile Include="People\PersonListing.cs" />
-    <Compile Include="People\PersonDetails.cs" />
+    <Compile Include="MusicalEntities\MusicalEntityViewModels.cs" />
+    <Compile Include="MusicalEvents\MusicalEventViewModels.cs" />
+    <Compile Include="MusicalEvents\PerformanceViewModels.cs" />
+    <Compile Include="MusicalEvents\PerformerViewModels.cs" />
+    <Compile Include="People\PersonViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PurchaseLocations\LocationBase.cs" />
-    <Compile Include="PurchaseLocations\LocationDetails.cs" />
-    <Compile Include="PurchaseLocations\LocationListing.cs" />
+    <Compile Include="PurchaseLocations\LocationViewModels.cs" />
+    <Compile Include="PurchaseLocations\WebsiteViewModels.cs" />
+    <Compile Include="Releases\CopyDetails.cs" />
     <Compile Include="Releases\ElementDetails.cs" />
     <Compile Include="Releases\ReleaseByYear.cs" />
     <Compile Include="Releases\ReleaseDetails.cs" />

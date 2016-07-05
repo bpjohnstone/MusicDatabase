@@ -38,7 +38,13 @@ namespace MusicDatabase.Services
             {
                 var musicalEntity = Repositiory.Get<MusicalEntity>(context, ID);
                 if (musicalEntity != null)
+                {
                     result = Mapper.Map<MusicalEntityDetails>(musicalEntity);
+                    result.Performances = new List<MusicalEventByMusicalEntity>();
+
+                    foreach(var performance in musicalEntity.Performances)
+                        result.Performances.Add(Mapper.Map<MusicalEventByMusicalEntity>(performance.Event));
+                }                    
             }
 
             return result;

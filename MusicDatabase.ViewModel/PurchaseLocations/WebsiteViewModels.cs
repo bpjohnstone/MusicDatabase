@@ -6,8 +6,5 @@ using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
-    public class MusicalEntityDetails : MusicalEntityBase
-    {
-        public List<MusicalEntityPerformanceListing> Performances { get; set; }
-    }
+
 }

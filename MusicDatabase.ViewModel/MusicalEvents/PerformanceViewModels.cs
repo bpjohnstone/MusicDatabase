@@ -11,21 +11,12 @@ namespace MusicDatabase.ViewModel
         public int Position { get; set; }
         public List<PerformerDetails> Performers { get; set; }        
         public string PerformingAs { get; set; }
+        public string Notes { get; set; }
         public bool Attended { get; set; }
 
         public PerformanceDetails()
         {
             Performers = new List<PerformerDetails>();
         }
-    }
-
-    public class HeadlinerDetails : PerformanceDetails
-    {
-
-    }
-
-    public class SupportDetails : PerformanceDetails
-    {
-
     }
 }

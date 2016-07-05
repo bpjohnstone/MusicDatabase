@@ -1,4 +1,5 @@
 ﻿@model MusicDatabase.ViewModel.MusicalEntityDetails
+@using MusicDatabase.ViewModel
 
 @{
     ViewBag.Title = "Details";
@@ -36,37 +37,54 @@
     <h4>Performances</h4>
 
     <table>
-        @foreach (var performance in Model.Performances.OrderByDescending(p => p.EventDate))
+        @foreach (var eventListing in Model.Performances.OrderByDescending(p => p.EventDate))
         {
             <tr>
-                <td style="padding-right: 20px;">@performance.EventDate.ToString("d MMMM yyyy")</td>
+                <td style="padding-right: 20px;">@eventListing.EventDate.ToString("d MMMM yyyy")</td>
                 <td style="padding-right: 20px;">
-                    @if (performance.VenueID != null)
+                    @if (eventListing.VenueID != null)
                     {
-                        @Html.ActionLink(performance.VenueName, "Details", "Locations", new { ID = performance.VenueID }, null)
-                        if (!string.IsNullOrWhiteSpace(performance.VenueCity))
+                        @Html.ActionLink(eventListing.VenueName, "Details", "Locations", new { ID = eventListing.VenueID }, null)
+                        if (!string.IsNullOrWhiteSpace(eventListing.VenueCity))
                         {
                             @Html.Raw(", ")
-                            @performance.VenueCity
+                            @eventListing.VenueCity
                         }
                     }
                 </td>
                 <td>
-                    @if(performance.Performers.Count(p => p.MusicalEntityID != Model.ID) > 1)
+                <td>
+                    @if (eventListing.EventGroupID != null)
                     {
+                        if (eventListing.EventType != EventType.Concert)
+                        {
+                            <text>@eventListing.EventGroupName </text>
 
+                            switch (eventListing.EventType)
+                            {
+                                case EventType.Festival:
+                                    <span style="font-weight: bold; font-size: 10px; color: red;">[Festival]</span>
+                                    break;
+                                case EventType.MultiDayFestival:
+                                    <span style="font-weight: bold; font-size: 10px; color: maroon;">[Multi-Day Festival]</span>
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            <text>(@eventListing.EventGroupName)</text>
+                        }
                     }
 
-                    @if(!string.IsNullOrWhiteSpace(performance.PerformingAs))
-                    {
-                        <text>Performing as <i>@performance.PerformingAs</i>.</text>
-                    }
+
+                    
                 </td>
+
             </tr>
         }
     </table>
 }
 
-    <p>
-        @Html.ActionLink("Back to List", "Index")
-    </p>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

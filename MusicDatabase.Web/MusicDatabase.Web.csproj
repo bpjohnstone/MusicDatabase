@@ -194,6 +194,7 @@
     <Content Include="Views\People\Details.cshtml" />
     <Content Include="Views\Locations\Index.cshtml" />
     <Content Include="Views\Locations\Details.cshtml" />
+    <Content Include="Views\MusicalEvents\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -224,7 +225,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Formats\" />
-    <Folder Include="Views\MusicalEvents\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MusicDatabase.EntityFramework\MusicDatabase.EntityFramework.csproj">
