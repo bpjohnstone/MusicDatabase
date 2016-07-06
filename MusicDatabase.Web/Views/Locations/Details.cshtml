@@ -1,24 +1,15 @@
-﻿@model MusicDatabase.ViewModel.LocationDetails
+﻿@model LocationDetails
 @using MusicDatabase.ViewModel
 
 @{
     ViewBag.Title = "Details";
 }
 
-<h2>Details</h2>
+<h2>@Model.SortName</h2>
 
 <div>
-    <h4>LocationDetails</h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>
-            Name
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.SortName)
-        </dd>
-
         @if (Model.LocationGroupID != null)
         {
             <dt>
@@ -109,14 +100,13 @@
     {
         <h4>Events</h4>
 
-        <table>
+        <table class="table">
 
             @foreach (var eventListing in Model.MusicalEvents.OrderByDescending(e => e.EventDate))
             {
-
                 <tr>
-                    <td style="padding-right: 20px;">
-                        @eventListing.EventDate.ToString("d MMMM yyyy")
+                    <td>
+                        @Html.ActionLink(eventListing.EventDate.ToString("d MMMM yyyy"), "Details", "MusicalEvents", new { ID = eventListing.ID }, null)
                     </td>
                     <td>
                         @if(eventListing.EventType != EventType.Concert)

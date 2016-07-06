@@ -19,18 +19,6 @@
     <h4>@year.Year</h4>
 
     <table class="table">
-        <tr>
-            <th>
-                Date
-            </th>
-            <th>
-                Headliners
-            </th>
-            <th>
-                Venue
-            </th>
-            <th></th>
-        </tr>
 
         @foreach (var item in year.Events.OrderByDescending(e => e.EventDate))
         {

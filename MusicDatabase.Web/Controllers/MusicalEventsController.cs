@@ -21,5 +21,23 @@ namespace MusicDatabase.Web.Controllers
         {
             return View(Service.RetrieveMusicalEventListings());
         }
+
+        // GET: Details
+        public ActionResult Details(Guid? ID)
+        {
+            ActionResult result = null;
+
+            if (ID.HasValue)
+            {
+                var musicalEvent = Service.RetrieveMusicalEventDetails(ID.Value);
+                if (musicalEvent != null)
+                    result = View(musicalEvent);
+            }
+
+            if (result == null)
+                result = RedirectToAction("Index");
+
+            return result;
+        }
     }
 }

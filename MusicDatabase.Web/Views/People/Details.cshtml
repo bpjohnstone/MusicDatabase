@@ -4,45 +4,25 @@
     ViewBag.Title = "Details";
 }
 
-<h2>Details</h2>
+<h2>@Model.Name</h2>
 
 <div>
-    <h4>PersonDetails</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Psuedonym)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Psuedonym)
-        </dd>
-
-    </dl>
-
 
     @if (Model.EventsAttended.Count > 0)
     {
-        <h4>Events</h4>
+        <h4>Events Attended</h4>
 
-        <table>
+        <table class="table">
 
             @foreach (var eventListing in Model.EventsAttended.OrderByDescending(e => e.EventDate))
             {
 
                 <tr>
-                    <td style="padding-right: 20px;">
-                        @eventListing.EventDate.ToString("d MMMM yyyy")
+                    <td>
+                        @Html.ActionLink(eventListing.EventDate.ToString("d MMMM yyyy"), "Details", "MusicalEvents", new { ID = eventListing.ID }, null)
                     </td>
-                    <td style="padding-right: 20px;">
+                    <td>
 
                         @if (!string.IsNullOrWhiteSpace(eventListing.EventName))
                         {
@@ -108,26 +88,6 @@
                             }
                         }
 
-                        @if (!string.IsNullOrWhiteSpace(eventListing.EventGroupName))
-                        {
-                            <text>(@eventListing.EventGroupName</text>
-
-                            if(eventListing is MusicDatabase.ViewModel.ConcertListing)
-                            {
-                                <text> show)</text>
-                            }
-                            else if (eventListing is MusicDatabase.ViewModel.FestivalListing)
-                            {
-                                <text> festival)</text>
-                                <span style="color: red; font-size: 10px; font-weight: bold;">[Festival]</span>
-                            }
-                            else if (eventListing is MusicDatabase.ViewModel.MultiDayFestivalListing)
-                            {
-                                <text> festival)</text>
-                                <span style="color: maroon; font-size: 10px; font-weight: bold;">[Multi-Day Festival]</span>
-                            }
-                        }
-
                     </td>
                     <td>
                         @if (!string.IsNullOrWhiteSpace(eventListing.VenueName))
@@ -140,6 +100,9 @@
                                 @eventListing.VenueCity
                             }
                         }
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", "MusicalEvents", new { ID = eventListing.ID }, null)
                     </td>
                 </tr>
                             }

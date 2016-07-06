@@ -25,13 +25,7 @@ namespace MusicDatabase.ViewModel
 
     public class PersonDetails : PersonBasic
     {
-        //public List<MusicalEventListing> EventsAttended { get; set; }
+        public List<MusicalEventListing> EventsAttended { get; set; }
         // GiftsGiven
-
-        public PersonDetails()
-        {
-            //EventsAttended = new List<MusicalEventListing>();
-            // GiftsGiven
-        }
     }
 }

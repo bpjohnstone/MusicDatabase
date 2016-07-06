@@ -25,6 +25,7 @@ namespace MusicDatabase.EntityFramework
             var copyData = new DataTable();
 
             var peopleData = new DataTable();
+            var groupData = new DataTable();
             var locationData = new DataTable();
             var websiteData = new DataTable();
             var concertData = new DataTable();
@@ -79,6 +80,10 @@ namespace MusicDatabase.EntityFramework
                 var oleDbAdapter = new OleDbDataAdapter(oleDbCommand);
                 oleDbAdapter.Fill(peopleData);
 
+                oleDbCommand = new OleDbCommand("SELECT * FROM [Groups$]", oleDbConnect);
+                oleDbAdapter = new OleDbDataAdapter(oleDbCommand);
+                oleDbAdapter.Fill(groupData);
+
                 oleDbCommand = new OleDbCommand("SELECT * FROM [Locations$]", oleDbConnect);
                 oleDbAdapter = new OleDbDataAdapter(oleDbCommand);
                 oleDbAdapter.Fill(locationData);
@@ -102,17 +107,20 @@ namespace MusicDatabase.EntityFramework
 
             var musicalEntities = ImportMusicalEntities(context, artistData);
 
-            var locationGroups = ImportGroups<LocationGroup>(context, locationData);
-            var locations = ImportLocations(context, locationGroups, locationData);
-            var websites = ImportWebsites(context, websiteData);
+            var groups = ImportGroups(context, groupData);
+            var locationGroups = groups.OfType<LocationGroup>().ToList();
+            var eventGroups = groups.OfType<EventGroup>().ToList();
+
+            var locations = ImportLocations(context, locationData, locationGroups);
+            var websites = ImportWebsites(context, websiteData, groups.OfType<WebsiteGroup>().ToList());
             AttachWebsitesToLocationGroups(context, locationGroups, websites, websiteData);
 
             var people = ImportPeople(context, peopleData);
 
             var musicalEvents = new List<MusicalEvent>();
-            ImportSingleDayEventData<Concert>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, concertData);
-            ImportSingleDayEventData<Festival>(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, festivalData);
-            ImportMultiDayFestivalData(context, musicalEvents, musicalEntities.Values.ToList(), locations, people, multiDayFestivalData);
+            ImportSingleDayEventData<Concert>(context, musicalEvents, eventGroups, musicalEntities.Values.ToList(), locations, people, concertData);
+            ImportSingleDayEventData<Festival>(context, musicalEvents, eventGroups, musicalEntities.Values.ToList(), locations, people, festivalData);
+            ImportMultiDayFestivalData(context, musicalEvents, groups.OfType<MultiDayFestivalGroup>().ToList(), eventGroups, musicalEntities.Values.ToList(), locations, people, multiDayFestivalData);
 
             List<Release> releases = new List<Release>();
 
@@ -580,7 +588,7 @@ namespace MusicDatabase.EntityFramework
             return musicalEntities;
         }
 
-        private List<Location> ImportLocations(MusicDbContext context, List<LocationGroup> locationGroups, DataTable locationData)
+        private List<Location> ImportLocations(MusicDbContext context, DataTable locationData, List<LocationGroup> locationGroups)
         {
             var locations = new List<Location>();
 
@@ -639,10 +647,9 @@ namespace MusicDatabase.EntityFramework
             return locations;
         }
 
-        private List<Website> ImportWebsites(MusicDbContext context, DataTable websiteData)
+        private List<Website> ImportWebsites(MusicDbContext context, DataTable websiteData, List<WebsiteGroup> websiteGroups)
         {
             var websites = new List<Website>();
-            var websiteGroups = ImportGroups<WebsiteGroup>(context, websiteData);
 
             foreach (DataRow row in websiteData.Rows)
             {
@@ -710,17 +717,30 @@ namespace MusicDatabase.EntityFramework
             context.SaveChanges();
         }
 
-        private List<T> ImportGroups<T>(MusicDbContext context, DataTable importData, string columnName = "Group") where T : AbstractGroup, new()
+        private List<AbstractGroup> ImportGroups(MusicDbContext context, DataTable importData)
+        {
+            var groups = new List<AbstractGroup>();
+
+            groups.AddRange(ImportGroups<LocationGroup>(context, importData, "Location"));
+            groups.AddRange(ImportGroups<WebsiteGroup>(context, importData, "Website"));
+            groups.AddRange(ImportGroups<EventGroup>(context, importData, "Event"));
+            groups.AddRange(ImportGroups<MultiDayFestivalGroup>(context, importData, "Multi-Day Festival"));
+
+            return groups;
+        }
+
+        private List<T> ImportGroups<T>(MusicDbContext context, DataTable importData, string groupType) where T : AbstractGroup, new()
         {
             var groups = new List<T>();
-            var groupData = importData.DefaultView.ToTable(true, columnName);
+            var groupData = importData.Select("Type = '" + groupType + "'");
 
-            foreach (DataRow row in groupData.Rows)
+            foreach (DataRow row in groupData)
             {
-                if (!string.IsNullOrWhiteSpace(row[columnName].ToString()))
+                if (!string.IsNullOrWhiteSpace(row["Name"].ToString()))
                 {
                     var group = new T();
-                    group.Name = row[columnName].ToString();
+                    group.Name = row["Name"].ToString();
+                    group.Notes = row["Notes"].ToString();
                     groups.Add(group);
                 }
             }
@@ -732,11 +752,10 @@ namespace MusicDatabase.EntityFramework
         }
 
         private void ImportSingleDayEventData<T>(MusicDbContext context, List<MusicalEvent> musicalEvents,
-            List<MusicalEntity> musicalEntities, List<Location> locations,
+            List<EventGroup> eventGroups, List<MusicalEntity> musicalEntities, List<Location> locations,
             List<Person> people, DataTable importData) where T : MusicalEvent, new()
         {
             var importedEvents = new List<T>();
-            var eventGroups = ImportGroups<EventGroup>(context, importData);
 
             foreach (DataRow row in importData.Rows)
             {
@@ -750,13 +769,11 @@ namespace MusicDatabase.EntityFramework
         }
 
         private void ImportMultiDayFestivalData(MusicDbContext context, List<MusicalEvent> musicalEvents, 
+            List<MultiDayFestivalGroup> festivalGroups, List<EventGroup> eventGroups,
             List<MusicalEntity> musicalEntities, List<Location> locations, List<Person> people, 
             DataTable importData)
         {
             var importedEvents = new List<MultiDayFestival>();
-
-            var eventGroups = ImportGroups<EventGroup>(context, importData);
-            var festivalGroups = ImportGroups<MultiDayFestivalGroup>(context, importData, "Festival Group");
 
             foreach(var festivalGroup in festivalGroups)
             {

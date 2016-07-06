@@ -28,5 +28,20 @@ namespace MusicDatabase.Services
 
             return result;
         }
+
+        public MusicalEventDetails RetrieveMusicalEventDetails(Guid ID)
+        {
+            MusicalEventDetails result = null;
+
+            using (var context = new MusicDbContext())
+            {
+                var musicalEvent = Repositiory.Get<MusicalEvent>(context, ID);
+                if (musicalEvent != null)
+                    result = Mapper.Map<MusicalEventDetails>(musicalEvent);
+            }
+
+            return result;
+        }
+
     }
 }

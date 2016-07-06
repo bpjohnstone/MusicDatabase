@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.Practices.Unity;
@@ -83,6 +84,7 @@ namespace MusicDatabase.Web.App_Start
                 // Musical Events
                 cfg.CreateMap<MusicalEvent, MusicalEventBase>()
                     .Include<MusicalEvent, MusicalEventListing>()
+                    .Include<MusicalEvent, MusicalEventDetails>()
                     .Include<MusicalEvent, MusicalEventByLocation>()
                     .Include<MusicalEvent, MusicalEventByMusicalEntity>()
                     .ForMember(dest => dest.EventType, opts => opts.ResolveUsing(src =>
@@ -99,6 +101,8 @@ namespace MusicDatabase.Web.App_Start
 
                 cfg.CreateMap<MusicalEvent, MusicalEventSimple>()
                     .Include<MusicalEvent, MusicalEventListing>()
+                    .Include<MusicalEvent, MusicalEventDetails>()
+                    .Include<MusicalEvent, MusicalEventByMusicalEntity>()
                     .ForMember(dest => dest.VenueName, opts => opts.MapFrom(src =>
                             !string.IsNullOrWhiteSpace(src.AlternateVenueName)
                                 ? src.AlternateVenueName
@@ -107,11 +111,15 @@ namespace MusicDatabase.Web.App_Start
 
                 cfg.CreateMap<MusicalEvent, MusicalEventListing>()
                     .ForMember(dest => dest.Headliners, opts => opts.MapFrom(src => src.Lineup.OfType<Headliner>()));
+                cfg.CreateMap<MusicalEvent, MusicalEventDetails>();
                 cfg.CreateMap<MusicalEvent, MusicalEventByLocation>()
                     .ForMember(dest => dest.Headliners, opts => opts.MapFrom(src => src.Lineup.OfType<Headliner>()));
                 cfg.CreateMap<MusicalEvent, MusicalEventByMusicalEntity>();
 
-                // Musical Events - Performances and Performers
+                // Musical Events - EventAttendees, Performances and Performers
+                cfg.CreateMap<EventAttendee, KeyValuePair<int, PersonBasic>>()
+                    .ConstructUsing((src, ctx) => new KeyValuePair<int, PersonBasic>(src.Position, ctx.Mapper.Map<PersonBasic>(src.Person)));
+
                 cfg.CreateMap<Performance, PerformanceDetails>();
                 cfg.CreateMap<Performer, PerformerDetails>();
 

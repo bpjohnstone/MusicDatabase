@@ -22,11 +22,13 @@ namespace MusicDatabase.ViewModel
     public class MusicalEventByLocation : MusicalEventBase
     {
         // Used in Locations/Details view
+        // Doesn't need venue details, so derives from the base
         public List<PerformanceDetails> Headliners { get; set; }
     }
 
     public abstract class MusicalEventSimple : MusicalEventBase
     {
+        // Includes Venue Details
         public Guid? VenueID { get; set; }
         public string VenueName { get; set; }
         public string VenueCity { get; set; }

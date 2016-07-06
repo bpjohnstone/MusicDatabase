@@ -1,0 +1,71 @@
+﻿@model MusicDatabase.ViewModel.MusicalEventDetails
+
+@{
+    ViewBag.Title = "Details";
+}
+
+@{
+    var title = "";
+
+    if (!string.IsNullOrWhiteSpace(Model.EventName))
+    {
+        title = Model.EventName;
+    }
+    else if(!string.IsNullOrWhiteSpace(Model.EventGroupName))
+    {
+        title = Model.EventGroupName;
+    }
+    else
+    {
+
+    }
+
+    <h2>@title</h2>
+}
+
+<div>
+    <h4>@Model.EventDate.ToString("d MMMM yyyy")</h4>
+    <hr />
+
+    @if(Model.VenueID != null)
+    {
+        @Html.ActionLink(Model.VenueName, "Details", "Locations", new { ID = Model.VenueID }, null);
+        @Html.Raw(", " + Model.VenueCity)
+    }
+
+    @if(Model.OtherAttendees.Count > 0)
+    {
+        <h4>Other Attendees</h4>
+
+        <ul>
+            @foreach(var attendee in Model.OtherAttendees.OrderBy(a => a.Key).Select(a => a.Value))
+            {
+                <li>@Html.ActionLink(attendee.Name, "Details", "People", new { ID = attendee.ID }, null)</li>
+            }
+        </ul>
+    }
+
+    @if(Model.Lineup.Count > 0)
+    {
+        <h4>Lineup</h4>
+
+        <table class="table">
+
+            @foreach(var performance in Model.Lineup.OrderBy(p => p.Position))
+            {
+                <tr>
+                    <td>@performance.Performers[0].MusicalEntityName</td>
+                    <td>@performance.Notes</td>
+                </tr>
+            }
+
+        </table>
+
+
+    }
+
+
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>
