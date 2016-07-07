@@ -8,7 +8,6 @@ namespace MusicDatabase.Model
 {
     // Extends an Entity, and allows "Tags" to be added to it, which basically just add some extra attributes.
     
-    // Currently, only Releases and Copies have tags added to them:
     // A Release can be tagged with "Live", "Remix", "Soundtrack", etc
     // A Copy can be tagged with "Secondhand", "Record Store Day Item", etc
     

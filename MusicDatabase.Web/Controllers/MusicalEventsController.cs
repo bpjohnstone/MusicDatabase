@@ -15,14 +15,13 @@ namespace MusicDatabase.Web.Controllers
             Service = service;
         }
 
-
         // GET: MusicalEvents
         public ActionResult Index()
         {
             return View(Service.RetrieveMusicalEventListings());
         }
 
-        // GET: Details
+        // GET: MusicalEvents/Details/e0424a11-fc69-4047-b543-e9967b044fad
         public ActionResult Details(Guid? ID)
         {
             ActionResult result = null;
@@ -32,6 +31,24 @@ namespace MusicDatabase.Web.Controllers
                 var musicalEvent = Service.RetrieveMusicalEventDetails(ID.Value);
                 if (musicalEvent != null)
                     result = View(musicalEvent);
+            }
+
+            if (result == null)
+                result = RedirectToAction("Index");
+
+            return result;
+        }
+
+        // GET: MusicalEvents/Group/e0424a11-fc69-4047-b543-e9967b044fad
+        public ActionResult Group(Guid? ID)
+        {
+            ActionResult result = null;
+
+            if(ID.HasValue)
+            {
+                var eventGroup = Service.RetrieveEventGroupDetails(ID.Value);
+                if (eventGroup != null)
+                    result = View(eventGroup);
             }
 
             if (result == null)

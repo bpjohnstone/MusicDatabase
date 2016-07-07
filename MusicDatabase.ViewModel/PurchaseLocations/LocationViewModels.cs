@@ -14,7 +14,9 @@ namespace MusicDatabase.ViewModel
         public string Name { get; set; }
         public string LocationGroupName { get; set; }
         public Guid? LocationGroupID { get; set; }
-        public string SortName { get; set; }
+
+        [Display(Name = "Full Name")]
+        public string FullName { get; set; }
 
         public string City { get; set; }
         public string State { get; set; }
@@ -27,6 +29,7 @@ namespace MusicDatabase.ViewModel
     public class LocationListing : LocationBase
     {
         // Used in Locations/Index view
+        // Used in any "Filtered" view (e.g. City, State, Country)
         [Display(Name="Musical Events")]
         public int MusicalEvents { get; set; }
         public int Purchases { get; set; }
@@ -49,6 +52,24 @@ namespace MusicDatabase.ViewModel
         public LocationDetails()
         {
             OtherNames = new Dictionary<int, string>();
+        }
+    }
+
+    public class LocationGroupDetails
+    {
+        public Guid ID { get; set; }
+        public string Name { get; set; }
+        public string Notes { get; set; }
+    }
+
+    public class FilteredLocationListings
+    {
+        public string Filter { get; set; }
+        public List<LocationListing> Locations { get; set; }
+
+        public FilteredLocationListings()
+        {
+            Locations = new List<LocationListing>();
         }
     }
 }

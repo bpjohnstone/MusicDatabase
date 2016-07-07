@@ -38,5 +38,37 @@ namespace MusicDatabase.Web.Controllers
 
             return result;
         }
+
+        // GET: Locations/Group/17a7c07e-dbeb-4235-9158-469e2ec32225
+        public ActionResult Group(Guid? ID)
+        {
+            ActionResult result = null;
+
+            if (result == null)
+                result = RedirectToAction("Index");
+
+            return result;
+        }
+
+        // GET: Locations/City/Geelong
+        [ActionName("City")]
+        public ActionResult FilterByCity(string ID)
+        {
+            return View("FilteredListing", Service.RetrieveLocationListingsByCity(ID));
+        }
+
+        // GET: Locations/State/Victoria
+        [ActionName("State")]
+        public ActionResult FilterByState(string ID)
+        {
+            return View("FilteredListing", Service.RetrieveListingsByState(ID));
+        }
+
+        // GET: Locations/Country/Australia
+        [ActionName("Country")]
+        public ActionResult FilterByCountry(string ID)
+        {
+            return View("FilteredListing", Service.RetrieveListingsByCountry(ID));
+        }
     }
 }

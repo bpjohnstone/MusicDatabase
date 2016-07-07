@@ -1,0 +1,10 @@
+﻿@model FilteredLocationListings
+@using MusicDatabase.ViewModel
+
+@{
+    ViewBag.Title = "Locations, Filtered By: " + Model.Filter;
+}
+
+<h2>Locations, Filtered By: @Model.Filter</h2>
+
+@{  Html.RenderPartial("_LocationListings", Model.Locations); }

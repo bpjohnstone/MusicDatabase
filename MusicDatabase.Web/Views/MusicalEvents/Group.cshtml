@@ -1,0 +1,27 @@
+﻿@model MusicDatabase.ViewModel.EventGroupDetails
+
+@{
+    ViewBag.Title = Model.Name;
+}
+
+<h2>@Model.Name</h2>
+
+<div>
+    <hr />
+
+    @if(!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <p>@Model.Notes</p>
+    }
+
+    @if(Model.MusicalEvents.Count > 0)
+    {
+        <h4>Events</h4>
+
+        Html.RenderPartial("_MusicalEventListing", Model.MusicalEvents);
+    }
+
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

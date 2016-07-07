@@ -219,7 +219,7 @@ namespace MusicDatabase.EntityFramework
                             PurchaseDetails purchaseDetails = null;
 
                             var locationName = releaseCopy["PurchaseLocation"].ToString();
-                            var purchaseLocation = locations.Find(l => (l.SortName == locationName) || (l.OtherNames.Any(n => n.Name == locationName)));
+                            var purchaseLocation = locations.Find(l => (l.FullName == locationName) || (l.OtherNames.Any(n => n.Name == locationName)));
 
                             if (Convert.ToBoolean(releaseCopy["isOnlinePurchase"]))
                             {
@@ -760,6 +760,14 @@ namespace MusicDatabase.EntityFramework
             foreach (DataRow row in importData.Rows)
             {
                 var musicalEvent = ImportEventData<T>(musicalEntities, locations, eventGroups, people, row);
+
+                // Concert - Secret Show?
+                if((musicalEvent is Concert) && (row["Secret Show"] != DBNull.Value))
+                {
+                    var concert = musicalEvent as Concert;
+                    concert.IsSecret = Convert.ToBoolean(row["Secret Show"]);
+                }
+
                 importedEvents.Add(musicalEvent);
                 musicalEvents.Add(musicalEvent);
             }
@@ -808,12 +816,12 @@ namespace MusicDatabase.EntityFramework
             string venueName = eventData["Venue"].ToString();
             if (!string.IsNullOrWhiteSpace(venueName))
             {
-                var venue = locations.Find(l => (l.SortName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
+                var venue = locations.Find(l => (l.FullName == venueName) || (l.OtherNames.Any(n => n.Name == venueName)));
                 if (venue != null)
                 {
                     musicalEvent.Venue = venue;
 
-                    if (venue.SortName != venueName)
+                    if (venue.FullName != venueName)
                         musicalEvent.AlternateVenueName = venueName;
                 }
             }

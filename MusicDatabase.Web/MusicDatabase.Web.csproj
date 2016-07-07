@@ -196,6 +196,10 @@
     <Content Include="Views\Locations\Details.cshtml" />
     <Content Include="Views\MusicalEvents\Index.cshtml" />
     <Content Include="Views\MusicalEvents\Details.cshtml" />
+    <Content Include="Views\Shared\_MusicalEventListing.cshtml" />
+    <Content Include="Views\MusicalEvents\Group.cshtml" />
+    <Content Include="Views\Locations\FilteredListing.cshtml" />
+    <Content Include="Views\Locations\_LocationListings.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

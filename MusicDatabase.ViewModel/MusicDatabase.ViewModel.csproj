@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Enums.cs" />
     <Compile Include="MusicalEntities\MusicalEntityViewModels.cs" />
+    <Compile Include="MusicalEvents\EventGroupViewModels.cs" />
     <Compile Include="MusicalEvents\MusicalEventViewModels.cs" />
     <Compile Include="MusicalEvents\PerformanceViewModels.cs" />
     <Compile Include="MusicalEvents\PerformerViewModels.cs" />

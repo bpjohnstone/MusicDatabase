@@ -59,8 +59,7 @@ namespace MusicDatabase.Web.App_Start
                     .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Count))
                     .ForMember(dest => dest.Releases, opts => opts.MapFrom(src => src.Discography.Count));
 
-                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>()
-                    .ForMember(dest => dest.Performances, opts => opts.Ignore());
+                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>();
 
                 // People
                 cfg.CreateMap<Person, PersonBasic>();
@@ -81,12 +80,27 @@ namespace MusicDatabase.Web.App_Start
                             dest.OtherNames.Add(name.Position, name.Name);
                     });
 
+                // Location Groups
+                cfg.CreateMap<LocationGroup, LocationGroupDetails>();
+
                 // Musical Events
                 cfg.CreateMap<MusicalEvent, MusicalEventBase>()
                     .Include<MusicalEvent, MusicalEventListing>()
                     .Include<MusicalEvent, MusicalEventDetails>()
                     .Include<MusicalEvent, MusicalEventByLocation>()
                     .Include<MusicalEvent, MusicalEventByMusicalEntity>()
+                    .ForMember(dest => dest.IsSecret, opts => opts.ResolveUsing(src => 
+                        {
+                            var isSecret = false;
+
+                            if (src is Concert)
+                            {
+                                var concert = src as Concert;
+                                isSecret = concert.IsSecret;
+                            }
+
+                            return isSecret;
+                        }))
                     .ForMember(dest => dest.EventType, opts => opts.ResolveUsing(src =>
                         {
                             var eventType = EventType.Concert;
@@ -106,7 +120,7 @@ namespace MusicDatabase.Web.App_Start
                     .ForMember(dest => dest.VenueName, opts => opts.MapFrom(src =>
                             !string.IsNullOrWhiteSpace(src.AlternateVenueName)
                                 ? src.AlternateVenueName
-                                : src.Venue.SortName
+                                : src.Venue.FullName
                         ));
 
                 cfg.CreateMap<MusicalEvent, MusicalEventListing>()
@@ -114,13 +128,31 @@ namespace MusicDatabase.Web.App_Start
                 cfg.CreateMap<MusicalEvent, MusicalEventDetails>();
                 cfg.CreateMap<MusicalEvent, MusicalEventByLocation>()
                     .ForMember(dest => dest.Headliners, opts => opts.MapFrom(src => src.Lineup.OfType<Headliner>()));
+
                 cfg.CreateMap<MusicalEvent, MusicalEventByMusicalEntity>();
+                cfg.CreateMap<Performance, MusicalEventByMusicalEntity>()
+                    .ConvertUsing((src, ctx) => ctx.Mapper.Map<MusicalEventByMusicalEntity>(src.Event));
+
+                // Musical Events - Event Groups
+                cfg.CreateMap<EventGroup, EventGroupDetails>();
 
                 // Musical Events - EventAttendees, Performances and Performers
                 cfg.CreateMap<EventAttendee, KeyValuePair<int, PersonBasic>>()
                     .ConstructUsing((src, ctx) => new KeyValuePair<int, PersonBasic>(src.Position, ctx.Mapper.Map<PersonBasic>(src.Person)));
 
-                cfg.CreateMap<Performance, PerformanceDetails>();
+                cfg.CreateMap<Performance, PerformanceDetails>()
+                    .ForMember(dest => dest.PerformanceType, opts => opts.ResolveUsing(src =>
+                        {
+                            var performanceType = PerformanceType.Performance;
+
+                            if (src is Headliner)
+                                performanceType = PerformanceType.Headliner;
+                            else if (src is Support)
+                                performanceType = PerformanceType.Support;
+
+                            return performanceType;
+                        }));
+
                 cfg.CreateMap<Performer, PerformerDetails>();
 
             });

@@ -17,6 +17,8 @@ namespace MusicDatabase.Model
 
     public class Concert : SingleDayEvent
     {
+        public bool IsSecret { get; set; }  // Was the Concert a secret show?
+
         public Concert()
             : this(null, null)
         {
@@ -26,7 +28,7 @@ namespace MusicDatabase.Model
         public Concert(DateTime? eventDate, Location venue)
             : base(eventDate, venue)
         {
-
+            IsSecret = false;
         }
     }
 

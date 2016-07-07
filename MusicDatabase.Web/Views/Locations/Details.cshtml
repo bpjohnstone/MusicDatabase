@@ -2,31 +2,29 @@
 @using MusicDatabase.ViewModel
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = Model.FullName;
 }
 
-<h2>@Model.SortName</h2>
+<h2>@Model.FullName</h2>
+
+@if (Model.LocationGroupID != null)
+{
+    <i>
+        Belongs to the
+        @Html.ActionLink(Model.LocationGroupName, "Group", "Locations", new { ID = Model.LocationGroupID }, null)
+        group
+    </i>
+}
 
 <div>
     <hr />
+
     <dl class="dl-horizontal">
-        @if (Model.LocationGroupID != null)
-        {
-            <dt>
-                Group
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.LocationGroupName)
-            </dd>
-        }
-
         <dt>
             Address
         </dt>
 
         <dd>
-
             @if (!string.IsNullOrWhiteSpace(Model.Address))
             {
                 @Model.Address<br />
@@ -37,13 +35,13 @@
                 @Model.Suburb<br />
             }
 
-            @Model.City<br />
+            @Html.ActionLink(Model.City, "City", new { ID = Model.City })<br />
 
             @if ((!string.IsNullOrWhiteSpace(Model.State)) || (!string.IsNullOrWhiteSpace(Model.Postcode)))
             {
                 if (!string.IsNullOrWhiteSpace(Model.State))
                 {
-                    <text>@Model.State </text>
+                    <text>@Html.ActionLink(Model.State, "State", new { ID = Model.State }) </text>
                 }
 
                 if (!string.IsNullOrWhiteSpace(Model.Postcode))
@@ -54,7 +52,7 @@
                 <br />
             }
 
-            @Model.Country
+            @Html.ActionLink(Model.Country, "Country", new { ID = Model.Country })
 
         </dd>
 
@@ -67,7 +65,7 @@
             </dd>
         }
 
-        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                        @if (!string.IsNullOrWhiteSpace(Model.Notes))
         {
             <dt>
                 @Html.DisplayNameFor(model => model.Notes)
@@ -78,7 +76,7 @@
             </dd>
         }
 
-        @if (Model.OtherNames.Count > 0)
+                        @if (Model.OtherNames.Count > 0)
         {
 
             <dt>
@@ -95,7 +93,7 @@
         }
 
     </dl>
-    
+
     @if (Model.MusicalEvents.Count > 0)
     {
         <h4>Events</h4>
@@ -110,18 +108,18 @@
                     </td>
                     <td>
                         @if(eventListing.EventType != EventType.Concert)
-                        {
+                {
                             <text>@eventListing.EventGroupName </text>
 
                             switch (eventListing.EventType)
-                            {
-                                case EventType.Festival:
+                    {
+                        case EventType.Festival:
                                     <span style="font-weight: bold; font-size: 10px; color: red;">[Festival]</span>
                                     break;
-                                case EventType.MultiDayFestival:
+                        case EventType.MultiDayFestival:
                                     <span style="font-weight: bold; font-size: 10px; color: maroon;">[Multi-Day Festival]</span>
                                     break;
-                            }
+                    }
 
                             <text> - </text>
                         }
@@ -133,7 +131,7 @@
 
                         @{
                             var count = eventListing.Headliners.Count();
-                            var current = 1;
+            var current = 1;
 
                             foreach (var headliner in eventListing.Headliners.OrderBy(p => p.Position))
                             {
@@ -151,7 +149,7 @@
 
 
                                 var performerCount = headliner.Performers.Count();
-                                var performerIndex = 1;
+            var performerIndex = 1;
 
                                 foreach (var performer in headliner.Performers.OrderBy(p => p.Position))
                                 {

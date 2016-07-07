@@ -1,0 +1,117 @@
+﻿@model IEnumerable<MusicalEventListing>
+@using MusicDatabase.ViewModel
+
+<table class="table">
+
+    @foreach (var musicalEvent in Model.OrderByDescending(e => e.EventDate))
+    {
+        <tr>
+            <td>
+                @Html.ActionLink(musicalEvent.EventDate.ToString("d MMMM yyyy"), "Details", "MusicalEvents", new { ID = musicalEvent.ID }, null)
+            </td>
+            <td>
+                @{
+
+                    if (((musicalEvent.EventType != EventType.Concert) && (musicalEvent.EventGroupID != null)) || (!string.IsNullOrWhiteSpace(musicalEvent.EventName)))
+                    {
+                        if ((musicalEvent.EventType != EventType.Concert) && (musicalEvent.EventGroupID != null))
+                        {
+                            @Html.ActionLink(musicalEvent.EventGroupName, "Group", new { ID = musicalEvent.EventGroupID })
+
+                            switch (musicalEvent.EventType)
+                            {
+                                case EventType.Festival:
+                                    <span style="font-weight: bold; font-size: 10px; color: red;">[Festival]</span>
+                                    break;
+                                case EventType.MultiDayFestival:
+                                    <span style="font-weight: bold; font-size: 10px; color: maroon;">[Multi-Day Festival]</span>
+                                    break;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(musicalEvent.EventName))
+                            {
+                                @Html.Raw(" - ");
+                            }
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(musicalEvent.EventName))
+                        {
+                            @Html.Raw(musicalEvent.EventName);
+                        }
+                        <br />
+                    }
+
+                    var performanceCount = musicalEvent.Headliners.Count;
+                    var performanceIndex = 1;
+
+                    foreach (var performance in musicalEvent.Headliners)
+                    {
+                        if (performanceIndex > 1)
+                        {
+                            if (performanceIndex == performanceCount)
+                            {
+                                @Html.Raw(" and ");
+                            }
+                            else
+                            {
+                                @Html.Raw(", ");
+                            }
+                        }
+
+                        var performerCount = performance.Performers.Count;
+                        var performerIndex = 1;
+
+                        foreach (var performer in performance.Performers.OrderBy(p => p.Position))
+                        {
+                            if (performerIndex > 1)
+                            {
+                                if (performerIndex == 2)
+                                {
+                                    <text> with </text>
+                                }
+                                else if (performerIndex == performerCount)
+                                {
+                                    <text> and </text>
+                                }
+                                else
+                                {
+                                    @Html.Raw(", ")
+                                }
+                            }
+
+                            @Html.ActionLink(performer.MusicalEntityName, "Details", "MusicalEntities", new { ID = performer.MusicalEntityID }, null);
+
+                            performerIndex++;
+                        }
+
+                        performanceIndex++;
+                    }
+
+                    if (performanceCount > 1)
+                    {
+                        <text> co-headlining</text>
+                    }
+
+                    if ((musicalEvent.EventType == EventType.Concert) && (musicalEvent.EventGroupID != null))
+                    {
+                        @Html.Raw(" (");
+                        @Html.ActionLink(musicalEvent.EventGroupName, "Group", "MusicalEvents", new { ID = musicalEvent.EventGroupID }, null);
+                        @Html.Raw(")");
+                    }
+                }
+            </td>
+            <td>
+                @if (musicalEvent.VenueID != null)
+                {
+                    @Html.ActionLink(musicalEvent.VenueName, "Details", "Locations", new { ID = musicalEvent.VenueID }, null)
+                    @Html.Raw(", ")
+                    @Html.ActionLink(musicalEvent.VenueCity, "City", "Locations", new { ID = musicalEvent.VenueCity }, null)
+                }
+            </td>
+            <td>
+                @Html.ActionLink("Details", "Details", "MusicalEvents", new { id = musicalEvent.ID }, null)
+            </td>
+        </tr>
+    }
+
+</table>

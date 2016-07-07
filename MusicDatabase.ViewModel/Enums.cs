@@ -12,4 +12,11 @@ namespace MusicDatabase.ViewModel
         Festival,
         MultiDayFestival
     }
+
+    public enum PerformanceType
+    {
+        Performance,
+        Support,
+        Headliner
+    }
 }

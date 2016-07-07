@@ -1,33 +1,20 @@
 ﻿@model MusicDatabase.ViewModel.MusicalEventDetails
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = string.Format("{0:dd/MM/yyyy} - {1}", Model.EventDate, Model.EventTitle);
 }
 
 @{
-    var title = "";
 
-    if (!string.IsNullOrWhiteSpace(Model.EventName))
-    {
-        title = Model.EventName;
-    }
-    else if(!string.IsNullOrWhiteSpace(Model.EventGroupName))
-    {
-        title = Model.EventGroupName;
-    }
-    else
-    {
-
-    }
-
-    <h2>@title</h2>
+    <h2>@Model.EventTitle</h2>
 }
+
+<hr />
 
 <div>
     <h4>@Model.EventDate.ToString("d MMMM yyyy")</h4>
-    <hr />
 
-    @if(Model.VenueID != null)
+    @if (Model.VenueID != null)
     {
         @Html.ActionLink(Model.VenueName, "Details", "Locations", new { ID = Model.VenueID }, null);
         @Html.Raw(", " + Model.VenueCity)
