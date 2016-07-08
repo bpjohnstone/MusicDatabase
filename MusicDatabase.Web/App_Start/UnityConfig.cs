@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.Practices.Unity;
-using Microsoft.Practices.Unity.Configuration;
 using MusicDatabase.Model;
 using MusicDatabase.Services.Interfaces;
 using MusicDatabase.Services.Repositories;
@@ -64,13 +63,15 @@ namespace MusicDatabase.Web.App_Start
                 // People
                 cfg.CreateMap<Person, PersonBasic>();
                 cfg.CreateMap<Person, PersonListing>()
-                    .ForMember(dest => dest.EventsAttended, opts => opts.MapFrom(src => src.EventsAttended.Count))
+                    .ForMember(dest => dest.EventsAttended, opts => opts.MapFrom(
+                        src => src.EventsAttended.Count(e => e is SingleDayEvent) + src.EventsAttended.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count()))
                     .ForMember(dest => dest.GiftsGiven, opts => opts.MapFrom(src => src.GiftsGiven.Count));
                 cfg.CreateMap<Person, PersonDetails>();
 
                 // Locations
                 cfg.CreateMap<Location, LocationListing>()
-                    .ForMember(dest => dest.MusicalEvents, opts => opts.MapFrom(src => src.MusicalEvents.Count))
+                    .ForMember(dest => dest.MusicalEvents, opts => opts.MapFrom(
+                        src => src.MusicalEvents.Count(e => e is SingleDayEvent) + src.MusicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count()))
                     .ForMember(dest => dest.Purchases, opts => opts.MapFrom(src => src.Purchases.Count));
                 cfg.CreateMap<Location, LocationDetails>()
                     .ForMember(dest => dest.OtherNames, opts => opts.Ignore())

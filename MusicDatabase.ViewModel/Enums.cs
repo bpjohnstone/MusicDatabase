@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MusicDatabase.ViewModel
+﻿namespace MusicDatabase.ViewModel
 {
     public enum EventType
     {
@@ -18,5 +12,12 @@ namespace MusicDatabase.ViewModel
         Performance,
         Support,
         Headliner
+    }
+
+    public enum FilterLocationBy
+    {
+        City,
+        State,
+        Country
     }
 }

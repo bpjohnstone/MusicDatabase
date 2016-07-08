@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MySql.Data.MySqlClient;
@@ -11,7 +10,7 @@ using System.Configuration;
 
 namespace MusicDatabase.EntityFramework
 {
-    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseIfModelChanges<MusicDbContext>
+    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseAlways<MusicDbContext>
     {
         protected override void Seed(MusicDbContext context)
         {

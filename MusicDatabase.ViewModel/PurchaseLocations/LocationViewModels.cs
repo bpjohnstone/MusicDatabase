@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicDatabase.ViewModel
 {
+    #region Base Classes
     public abstract class LocationBase
     {
         public Guid ID { get; set; }
@@ -54,22 +53,42 @@ namespace MusicDatabase.ViewModel
             OtherNames = new Dictionary<int, string>();
         }
     }
+    #endregion
 
-    public class LocationGroupDetails
+    #region ViewModels
+    public class LocationListingCollection
     {
-        public Guid ID { get; set; }
-        public string Name { get; set; }
-        public string Notes { get; set; }
-    }
-
-    public class FilteredLocationListings
-    {
-        public string Filter { get; set; }
         public List<LocationListing> Locations { get; set; }
 
-        public FilteredLocationListings()
+        public int TotalMusicalEvents
+        {
+            get { return Locations.Sum(l => l.MusicalEvents); }
+        }
+
+        public int TotalPurchases
+        {
+            get { return Locations.Sum(l => l.Purchases); }
+        }
+
+        public LocationListingCollection()
         {
             Locations = new List<LocationListing>();
         }
     }
+
+    public class FilteredLocationListingCollection : LocationListingCollection
+    {
+        public string Filter { get; set; }
+        public FilterLocationBy FilterType { get; set; }
+    }
+    
+    public class LocationGroupDetails : LocationListingCollection
+    {
+        public Guid ID { get; set; }
+        public string Name { get; set; }
+        public string Notes { get; set; }
+
+        public Guid? WebsiteID { get; set; }
+    }
+    #endregion
 }

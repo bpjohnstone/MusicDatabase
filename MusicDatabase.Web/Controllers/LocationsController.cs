@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using MusicDatabase.Services;
 
@@ -9,8 +6,8 @@ namespace MusicDatabase.Web.Controllers
 {
     public class LocationsController : Controller
     {
-        private LocationsService Service;
-        public LocationsController(LocationsService service)
+        private LocationService Service;
+        public LocationsController(LocationService service)
         {
             Service = service;
         }
@@ -44,6 +41,13 @@ namespace MusicDatabase.Web.Controllers
         {
             ActionResult result = null;
 
+            if (ID.HasValue)
+            {
+                var locationGroup = Service.RetrieveLocationGroupDetails(ID.Value);
+                if (locationGroup != null)
+                    result = View(locationGroup);
+            }
+
             if (result == null)
                 result = RedirectToAction("Index");
 
@@ -61,14 +65,14 @@ namespace MusicDatabase.Web.Controllers
         [ActionName("State")]
         public ActionResult FilterByState(string ID)
         {
-            return View("FilteredListing", Service.RetrieveListingsByState(ID));
+            return View("FilteredListing", Service.RetrieveLocationListingsByState(ID));
         }
 
         // GET: Locations/Country/Australia
         [ActionName("Country")]
         public ActionResult FilterByCountry(string ID)
         {
-            return View("FilteredListing", Service.RetrieveListingsByCountry(ID));
+            return View("FilteredListing", Service.RetrieveLocationListingsByCountry(ID));
         }
     }
 }

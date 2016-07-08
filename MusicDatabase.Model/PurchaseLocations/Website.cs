@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace MusicDatabase.Model
 {
@@ -12,6 +8,7 @@ namespace MusicDatabase.Model
         public string Name { get; set; }
         public string Address { get; set; }
         public virtual WebsiteGroup WebsiteGroup { get; set; }
+        public string Notes { get; set; }
 
         public string SortName
         {

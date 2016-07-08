@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using MusicDatabase.Services;
 
@@ -9,8 +6,8 @@ namespace MusicDatabase.Web.Controllers
 {
     public class PeopleController : Controller
     {
-        private PeopleService Service;
-        public PeopleController(PeopleService service)
+        private PersonService Service;
+        public PeopleController(PersonService service)
         {
             Service = service;
         }

@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Linq;
-using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using MusicDatabase.Model;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Services;
 
@@ -16,8 +9,8 @@ namespace MusicDatabase.Web.Controllers
     {
         private MusicDbContext db = new MusicDbContext();
 
-        private MusicalEntitiesService Service;
-        public MusicalEntitiesController(MusicalEntitiesService service)
+        private MusicalEntityService Service;
+        public MusicalEntitiesController(MusicalEntityService service)
         {
             Service = service;
         }

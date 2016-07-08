@@ -1,0 +1,31 @@
+﻿@model MusicDatabase.ViewModel.LocationGroupDetails
+
+@{
+    ViewBag.Title = Model.Name;
+}
+
+<h2>@Model.Name</h2>
+
+<div>
+    <hr />
+
+    @{
+
+        if(Model.WebsiteID != null)
+        {
+            <p><i>This location group has a website, with items purchased off it</i></p>
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <p>@Model.Notes</p>
+        }
+
+        Html.RenderPartial("_LocationListings", Model);
+
+    }
+
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

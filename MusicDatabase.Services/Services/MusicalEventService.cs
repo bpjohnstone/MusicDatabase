@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
@@ -11,9 +9,9 @@ using MusicDatabase.ViewModel;
 
 namespace MusicDatabase.Services
 {
-    public class MusicalEventsService : BaseService
+    public class MusicalEventService : BaseService
     {
-        public MusicalEventsService(IRepository repository, IMapper mapper)
+        public MusicalEventService(IRepository repository, IMapper mapper)
             :base(repository, mapper) { }
 
         public IEnumerable<MusicalEventListing> RetrieveMusicalEventListings()

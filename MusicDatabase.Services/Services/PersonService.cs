@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
 using MusicDatabase.Services.Interfaces;
-using MusicDatabase.Services.Repositories;
 using MusicDatabase.ViewModel;
 
 namespace MusicDatabase.Services
 {
-    public class PeopleService : BaseService
+    public class PersonService : BaseService
     {
-        public PeopleService(IRepository repository, IMapper mapper)
+        public PersonService(IRepository repository, IMapper mapper)
             :base(repository, mapper) { }
 
         public IEnumerable<PersonListing> RetrievePersonListings()

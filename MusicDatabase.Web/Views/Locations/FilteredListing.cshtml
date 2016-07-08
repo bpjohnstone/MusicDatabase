@@ -1,4 +1,4 @@
-﻿@model FilteredLocationListings
+﻿@model FilteredLocationListingCollection
 @using MusicDatabase.ViewModel
 
 @{
@@ -7,4 +7,4 @@
 
 <h2>Locations, Filtered By: @Model.Filter</h2>
 
-@{  Html.RenderPartial("_LocationListings", Model.Locations); }
+@{  Html.RenderPartial("_LocationListings", Model); }

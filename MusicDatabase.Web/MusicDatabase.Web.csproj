@@ -200,6 +200,7 @@
     <Content Include="Views\MusicalEvents\Group.cshtml" />
     <Content Include="Views\Locations\FilteredListing.cshtml" />
     <Content Include="Views\Locations\_LocationListings.cshtml" />
+    <Content Include="Views\Locations\Group.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

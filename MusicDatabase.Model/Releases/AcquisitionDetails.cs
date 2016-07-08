@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicDatabase.Model
 {
     // A copy can be acquired by a whole bunch of ways, but there are two different types of acquisitions:
-    
+
     // Purchases, which break down into:
-    
+
     // - Bought in a store (StorePurchase)
     // - Bought online (OnlinePurchase)
     // - Bought a concert (EventPurchase)
 
     // Or stuff that was "Received"
-    
+
     // - Gifts (GiftDetails)
     // - Stuff won in a competition (CompetitionItemDetails)
 

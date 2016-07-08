@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
 using MusicDatabase.Services.Interfaces;
-using MusicDatabase.Services.Repositories;
 
 namespace MusicDatabase.Services
 {
-    public class ReleasesService : BaseService
+    public class ReleaseService : BaseService
     {
-        public ReleasesService(IRepository repository, IMapper mapper)
+        public ReleaseService(IRepository repository, IMapper mapper)
             :base(repository, mapper) { }
 
         public IEnumerable<Release> RetrieveReleasesByYear(int year)
