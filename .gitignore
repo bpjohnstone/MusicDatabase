@@ -245,3 +245,4 @@ ModelManifest.xml
 .fake/
 /MusicDatabase.Web/Web.sensitive.config
 /MusicDatabase.Web/App_Data/ImportData.xlsx
+/MusicDatabase.Web/App_Data/to-worry-about.txt

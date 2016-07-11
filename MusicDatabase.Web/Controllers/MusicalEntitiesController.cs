@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Web.Mvc;
+using AutoMapper;
 using MusicDatabase.EntityFramework;
-using MusicDatabase.Services;
+using MusicDatabase.Services.Queries.MusicalEntities;
 
 namespace MusicDatabase.Web.Controllers
 {
-    public class MusicalEntitiesController : Controller
+    public class MusicalEntitiesController : DataController
     {
-        private MusicDbContext db = new MusicDbContext();
-
-        private MusicalEntityService Service;
-        public MusicalEntitiesController(MusicalEntityService service)
-        {
-            Service = service;
-        }
+        public MusicalEntitiesController(MusicDbContext context, IMapper mapper)
+            : base(context, mapper) { }
 
         // GET: MusicalEntities
         public ActionResult Index()
         {
-            return View(Service.RetrieveMusicalEntityListings());
+            var query = new RetrieveMusicalEntityListings(Context, Mapper);
+            return View(query.Execute());
         }
 
         // GET: MusicalEntities/Details/e0424a11-fc69-4047-b543-e9967b044fad
@@ -28,7 +25,10 @@ namespace MusicDatabase.Web.Controllers
 
             if (ID.HasValue)
             {
-                var musicalEntity = Service.RetrieveMusicalEntityDetails(ID.Value);
+                var query = new RetrieveMusicalEntityDetails(Context, Mapper);
+                query.ID = ID.Value;
+
+                var musicalEntity = query.Execute();
                 if (musicalEntity != null)
                     result = View(musicalEntity);
             }
@@ -124,7 +124,7 @@ namespace MusicDatabase.Web.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                Context.Dispose();
             }
             base.Dispose(disposing);
         }

@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Web.Mvc;
-using MusicDatabase.Services;
+using AutoMapper;
+using MusicDatabase.EntityFramework;
+using MusicDatabase.Services.Queries.Locations;
 
 namespace MusicDatabase.Web.Controllers
 {
-    public class LocationsController : Controller
+    public class LocationsController : DataController
     {
-        private LocationService Service;
-        public LocationsController(LocationService service)
-        {
-            Service = service;
-        }
+        public LocationsController(MusicDbContext context, IMapper mapper)
+            : base(context, mapper) { }
 
         // GET: Locations
         public ActionResult Index()
         {
-            return View(Service.RetrieveLocationListings());
+            var query = new RetrieveLocationListingCollection(Context, Mapper);
+            return View(query.Execute());
         }
 
         // GET: Locations/Details/16210421-de01-46a9-9aa6-fa10fba28bc9
@@ -25,9 +25,12 @@ namespace MusicDatabase.Web.Controllers
 
             if (ID.HasValue)
             {
-                var person = Service.RetrieveLocationDetails(ID.Value);
-                if (person != null)
-                    result = View(person);
+                var query = new RetrieveLocationDetails(Context, Mapper);
+                query.ID = ID.Value;
+
+                var location = query.Execute();
+                if (location != null)
+                    result = View(location);
             }
 
             if (result == null)
@@ -43,8 +46,11 @@ namespace MusicDatabase.Web.Controllers
 
             if (ID.HasValue)
             {
-                var locationGroup = Service.RetrieveLocationGroupDetails(ID.Value);
-                if (locationGroup != null)
+                var query = new RetrieveLocationGroupDetails(Context, Mapper);
+                query.ID = ID.Value;
+
+                var locationGroup = query.Execute();
+                if(locationGroup != null)
                     result = View(locationGroup);
             }
 
@@ -58,21 +64,33 @@ namespace MusicDatabase.Web.Controllers
         [ActionName("City")]
         public ActionResult FilterByCity(string ID)
         {
-            return View("FilteredListing", Service.RetrieveLocationListingsByCity(ID));
+            var query = new RetrieveFilteredLocationListingCollection(Context, Mapper);
+            query.LocationFilter = ViewModel.FilterLocationBy.City;
+            query.Filter = ID;
+
+            return View("FilteredListing", query.Execute());
         }
 
         // GET: Locations/State/Victoria
         [ActionName("State")]
         public ActionResult FilterByState(string ID)
         {
-            return View("FilteredListing", Service.RetrieveLocationListingsByState(ID));
+            var query = new RetrieveFilteredLocationListingCollection(Context, Mapper);
+            query.LocationFilter = ViewModel.FilterLocationBy.State;
+            query.Filter = ID;
+
+            return View("FilteredListing", query.Execute());
         }
 
         // GET: Locations/Country/Australia
         [ActionName("Country")]
         public ActionResult FilterByCountry(string ID)
         {
-            return View("FilteredListing", Service.RetrieveLocationListingsByCountry(ID));
+            var query = new RetrieveFilteredLocationListingCollection(Context, Mapper);
+            query.LocationFilter = ViewModel.FilterLocationBy.Country;
+            query.Filter = ID;
+
+            return View("FilteredListing", query.Execute());
         }
     }
 }

@@ -51,10 +51,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PurchaseLocations\LocationViewModels.cs" />
     <Compile Include="PurchaseLocations\WebsiteViewModels.cs" />
-    <Compile Include="Releases\CopyDetails.cs" />
-    <Compile Include="Releases\ElementDetails.cs" />
+    <Compile Include="Releases\CopyViewModels.cs" />
+    <Compile Include="Releases\ElementViewModels.cs" />
     <Compile Include="Releases\ReleaseByYear.cs" />
-    <Compile Include="Releases\ReleaseDetails.cs" />
+    <Compile Include="Releases\ReleaseViewModels.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

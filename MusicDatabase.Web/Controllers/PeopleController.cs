@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Web.Mvc;
-using MusicDatabase.Services;
+using AutoMapper;
+using MusicDatabase.EntityFramework;
+using MusicDatabase.Services.Queries.People;
 
 namespace MusicDatabase.Web.Controllers
 {
-    public class PeopleController : Controller
+    public class PeopleController : DataController
     {
-        private PersonService Service;
-        public PeopleController(PersonService service)
-        {
-            Service = service;
-        }
+        public PeopleController(MusicDbContext context, IMapper mapper)
+            : base(context, mapper) { }
 
         // GET: People
         public ActionResult Index()
         {
-            return View(Service.RetrievePersonListings());
+            var query = new RetrievePersonListings(Context, Mapper);
+            return View(query.Execute());
         }
 
         // GET: Details
@@ -25,7 +25,10 @@ namespace MusicDatabase.Web.Controllers
 
             if (ID.HasValue)
             {
-                var person = Service.RetrievePersonDetails(ID.Value);
+                var query = new RetrievePersonDetails(Context, Mapper);
+                query.ID = ID.Value;
+
+                var person = query.Execute();
                 if (person != null)
                     result = View(person);
             }

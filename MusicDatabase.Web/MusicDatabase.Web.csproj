@@ -146,6 +146,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\to-worry-about.txt" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
@@ -183,10 +184,7 @@
     <Content Include="Views\web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Views\MusicalEntities\Create.cshtml" />
-    <Content Include="Views\MusicalEntities\Delete.cshtml" />
     <Content Include="Views\MusicalEntities\Details.cshtml" />
-    <Content Include="Views\MusicalEntities\Edit.cshtml" />
     <Content Include="Views\MusicalEntities\Index.cshtml" />
     <Content Include="Views\Releases\Index.cshtml" />
     <Content Include="Views\Releases\ByYearListing.cshtml" />
@@ -201,6 +199,7 @@
     <Content Include="Views\Locations\FilteredListing.cshtml" />
     <Content Include="Views\Locations\_LocationListings.cshtml" />
     <Content Include="Views\Locations\Group.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -218,7 +217,9 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="App_Start\UnityMvcActivator.cs" />
+    <Compile Include="Controllers\DataController.cs" />
     <Compile Include="Controllers\FormatsController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LocationsController.cs" />
     <Compile Include="Controllers\MusicalEntitiesController.cs" />
     <Compile Include="Controllers\MusicalEventsController.cs" />

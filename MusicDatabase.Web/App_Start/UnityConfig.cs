@@ -4,8 +4,6 @@ using System.Linq;
 using AutoMapper;
 using Microsoft.Practices.Unity;
 using MusicDatabase.Model;
-using MusicDatabase.Services.Interfaces;
-using MusicDatabase.Services.Repositories;
 using MusicDatabase.ViewModel;
 
 namespace MusicDatabase.Web.App_Start
@@ -53,13 +51,6 @@ namespace MusicDatabase.Web.App_Start
                         return src;
                 });
 
-                // Musical Entities
-                cfg.CreateMap<MusicalEntity, MusicalEntityListing>()
-                    .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Count))
-                    .ForMember(dest => dest.Releases, opts => opts.MapFrom(src => src.Discography.Count));
-
-                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>();
-
                 // People
                 cfg.CreateMap<Person, PersonBasic>();
                 cfg.CreateMap<Person, PersonListing>()
@@ -75,14 +66,41 @@ namespace MusicDatabase.Web.App_Start
                     .ForMember(dest => dest.Purchases, opts => opts.MapFrom(src => src.Purchases.Count));
                 cfg.CreateMap<Location, LocationDetails>()
                     .ForMember(dest => dest.OtherNames, opts => opts.Ignore())
-                    .AfterMap((src, dest) => 
-                    { 
+                    .AfterMap((src, dest) =>
+                    {
                         foreach (var name in src.OtherNames)
                             dest.OtherNames.Add(name.Position, name.Name);
                     });
 
                 // Location Groups
                 cfg.CreateMap<LocationGroup, LocationGroupDetails>();
+
+                // Websites
+
+                // Musical Entities
+                cfg.CreateMap<MusicalEntity, MusicalEntityListing>()
+                    .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Count))
+                    .ForMember(dest => dest.Releases, opts => opts.MapFrom(src => src.Discography.Count));
+
+                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>();
+
+                // Releases
+                cfg.CreateMap<DiscographyEntry, KeyValuePair<int, ReleaseListing>>()
+                    .ConstructUsing((src, ctx) => new KeyValuePair<int, ReleaseListing>(src.Position, ctx.Mapper.Map<ReleaseListing>(src.Release)));
+
+                cfg.CreateMap<Release, ReleaseListing>();
+
+                cfg.CreateMap<Copy, CopyBase>()
+                    .Include<Copy, CopyListing>()
+                    .Include<Copy, CopyDetails>()
+                    .ForMember(dest => dest.DateAdded, opts => opts.MapFrom(src => src.AcquisitionDetails.DateAdded))
+                    .ForMember(dest => dest.AcquisitionNotes, opts => opts.MapFrom(src => src.AcquisitionDetails.Notes))
+                    .ForMember(dest => dest.CopyNotes, opts => opts.MapFrom(src => src.Notes));
+
+                cfg.CreateMap<Copy, CopyListing>();
+                cfg.CreateMap<Copy, CopyDetails>();
+
+                cfg.CreateMap<Element, ElementDetails>();
 
                 // Musical Events
                 cfg.CreateMap<MusicalEvent, MusicalEventBase>()
@@ -158,11 +176,10 @@ namespace MusicDatabase.Web.App_Start
 
             });
 
-            // TODO: Register your types here
+            // Add in Automapper
             container.RegisterInstance(config);
             container.RegisterInstance(container.Resolve<MapperConfiguration>().CreateMapper());
 
-            container.RegisterType<IRepository, EntityRepository>();
         }
     }
 }

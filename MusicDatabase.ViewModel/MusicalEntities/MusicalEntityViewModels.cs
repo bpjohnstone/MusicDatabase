@@ -27,5 +27,6 @@ namespace MusicDatabase.ViewModel
     {
         // Used in MusicalEntities/Details
         public List<MusicalEventByMusicalEntity> Performances { get; set; }
+        public Dictionary<int, ReleaseListing> Discography { get; set; }
     }
 }

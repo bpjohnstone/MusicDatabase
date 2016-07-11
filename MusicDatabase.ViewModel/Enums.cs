@@ -20,4 +20,13 @@
         State,
         Country
     }
+
+    public enum AcquisitionType
+    {
+        StorePurchase,
+        OnlinePurchase,
+        EventPurchase,
+        Gift,
+        CompetitionPrize
+    }
 }

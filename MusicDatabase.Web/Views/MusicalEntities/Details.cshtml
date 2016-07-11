@@ -23,6 +23,60 @@
     </dl>
 </div>
 
+@if (Model.Discography.Count > 0)
+{
+    <h4>Collected Discography</h4>
+
+    <ul>
+
+        @foreach(var release in Model.Discography.OrderByDescending(r => r.Key).Select(r => r.Value))
+        {
+            <li>
+                @release.Title (@release.Year)
+                
+                @if (release.Copies.Count > 0)
+                {
+                    <ul>
+                        @foreach (var copy in release.Copies.OrderByDescending(c => c.DateAdded))
+                        {
+                            <li>
+                                @{ 
+                                    if(copy.DateAdded.HasValue)
+                                    {
+                                        <text>@copy.DateAdded.Value.ToString("dd/MM/yyyy") - </text>
+                                    }
+
+                                    var elementIndex = 1;
+
+                                    foreach (var element in copy.Elements)
+                                    {
+                                        if(elementIndex > 1)
+                                        {
+                                            <text> + </text>
+                                        }
+
+                                        if(element.Count > 1)
+                                        {
+                                            <text>@element.Count@element.FormatCode</text>
+                                        }
+                                        else
+                                        {
+                                            <text>@element.FormatCode</text>
+                                        }
+
+                                        elementIndex++;
+                                    }
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </li>
+        }
+
+    </ul>
+}
+
 @if (Model.Performances.Count > 0)
 {
     <h4>Performances</h4>

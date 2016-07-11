@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using System.Web.Mvc;
-using MusicDatabase.Services;
 
 namespace MusicDatabase.Web.Controllers
 {
-    public class ReleasesController : Controller
+    public class HomeController : Controller
     {
-        // GET: Releases
+        // GET: Home
         public ActionResult Index()
         {
             return View();
