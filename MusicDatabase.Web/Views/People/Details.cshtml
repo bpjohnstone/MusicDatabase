@@ -9,6 +9,12 @@
 <div>
     <hr />
 
+    @if(Model.UpcomingEvents.Count > 0)
+    {
+        <h4>Upcoming</h4>
+        Html.RenderPartial("_MusicalEventListing", Model.UpcomingEvents);
+    }
+
     @if (Model.EventsAttended.Count > 0)
     {
         <h4>Events Attended</h4>

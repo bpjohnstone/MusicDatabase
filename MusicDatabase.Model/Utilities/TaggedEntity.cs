@@ -12,7 +12,7 @@ namespace MusicDatabase.Model
 
     public abstract class TaggedEntity : Entity
     {
-        public virtual ICollection<Tag> Tags { get; set; }
+        public ICollection<Tag> Tags { get; set; }
 
         public TaggedEntity()
         {

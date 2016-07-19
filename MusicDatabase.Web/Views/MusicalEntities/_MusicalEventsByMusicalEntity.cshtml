@@ -1,0 +1,47 @@
+﻿@model IEnumerable<MusicalEventByMusicalEntity>
+@using MusicDatabase.ViewModel
+
+<table class="table">
+    @foreach (var eventListing in Model.OrderByDescending(p => p.EventDate))
+    {
+        <tr>
+            <td>@Html.ActionLink(eventListing.EventDate.ToString("d MMMM yyyy"), "Details", "MusicalEvents", new { ID = eventListing.ID }, null)</td>
+            <td>
+                @if (eventListing.VenueID != null)
+                {
+                    @Html.ActionLink(eventListing.VenueName, "Details", "Locations", new { ID = eventListing.VenueID }, null)
+                    if (!string.IsNullOrWhiteSpace(eventListing.VenueCity))
+                    {
+                        @Html.Raw(", ")
+                        @eventListing.VenueCity
+                    }
+                }
+            </td>
+            <td>
+                @if (eventListing.EventGroupID != null)
+                {
+                    if (eventListing.EventType != EventType.Concert)
+                    {
+                        <text>@eventListing.EventGroupName </text>
+
+                        switch (eventListing.EventType)
+                        {
+                            case EventType.Festival:
+                                <span style="font-weight: bold; font-size: 10px; color: red;">[Festival]</span>
+                                break;
+                            case EventType.MultiDayFestival:
+                                <span style="font-weight: bold; font-size: 10px; color: maroon;">[Multi-Day Festival]</span>
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        <text>(@eventListing.EventGroupName)</text>
+                    }
+                }
+
+            </td>
+
+        </tr>
+    }
+</table>

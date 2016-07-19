@@ -43,7 +43,16 @@ namespace MusicDatabase.Services.Queries.MusicalEntities
                     break;
             }
 
-            query.ToList().ForEach(e => result.Add(Mapper.Map<MusicalEntityListing>(e)));
+            foreach (var musicalEntity in query.ToList())
+            {
+                var listing = Mapper.Map<MusicalEntityListing>(musicalEntity);
+
+                var musicalEvents = Context.Entry(musicalEntity).Collection(l => l.Performances).Query().Select(p => p.Event).Where(e => e.EventDate < DateTime.Now);
+                listing.Performances = musicalEvents.Count(e => e is SingleDayEvent) + musicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
+                listing.Releases = Context.Entry(musicalEntity).Collection(l => l.Discography).Query().Count();
+
+                result.Add(listing);
+            }
 
             return result;
         }

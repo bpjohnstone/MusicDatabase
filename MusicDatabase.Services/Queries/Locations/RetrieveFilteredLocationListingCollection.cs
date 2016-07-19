@@ -68,7 +68,16 @@ namespace MusicDatabase.Services.Queries.Locations
                     break;
             }
 
-            query.ToList().ForEach(l => result.Locations.Add(Mapper.Map<LocationListing>(l)));
+            foreach (var location in query.ToList())
+            {
+                var listing = Mapper.Map<LocationListing>(location);
+
+                var musicalEvents = Context.Entry(location).Collection(l => l.MusicalEvents).Query();
+                listing.MusicalEvents = musicalEvents.Count(e => e is SingleDayEvent) + musicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
+                listing.Purchases = Context.Entry(location).Collection(l => l.Purchases).Query().Count();
+
+                result.Locations.Add(listing);
+            }
 
             return result;
         }

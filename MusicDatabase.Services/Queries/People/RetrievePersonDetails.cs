@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
@@ -25,7 +26,9 @@ namespace MusicDatabase.Services.Queries.People
 
             if (ID != Guid.Empty)
             {
-                var person = Context.Set<Person>().Find(ID);
+                var person = Context.Set<Person>()
+                                .Include(p => p.EventsAttended.Select(e => e.Lineup.Select(l => l.Performers.Select(pe => pe.MusicalEntity))))
+                                .Single(p => p.ID == ID);
 
                 // If the entity is inactive, and returnIfInactive = false, return nothing
                 if ((!person.IsActive) && (!ReturnIfInactive))

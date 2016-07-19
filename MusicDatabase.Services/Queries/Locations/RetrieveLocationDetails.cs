@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
@@ -23,8 +24,11 @@ namespace MusicDatabase.Services.Queries.Locations
             LocationDetails result = null;
 
             if(ID != Guid.Empty)
-            { 
-                var location = Context.Set<Location>().Find(ID);
+            {
+                var location = Context.Set<Location>()
+                                    .Include(e => e.MusicalEvents.Select(l => l.Lineup.Select(p => p.Performers)))
+                                    .Include("Purchases")
+                                    .Single(l => l.ID == ID);
 
                 // If the entity is inactive, and returnIfInactive = false, return nothing
                 if ((!location.IsActive) && (!ReturnIfInactive))

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
 using MusicDatabase.Model;
@@ -25,7 +26,9 @@ namespace MusicDatabase.Services.Queries.MusicalEvents
         public IEnumerable<MusicalEventListing> Execute()
         {
             var result = new List<MusicalEventListing>();
-            var query = Context.Set<MusicalEvent>().AsQueryable();
+            var query = Context.Set<MusicalEvent>()
+                            .Include(e => e.Lineup.Select(l => l.Performers.Select(p => p.MusicalEntity)))
+                            .AsQueryable();
 
             switch (EntityState)
             {

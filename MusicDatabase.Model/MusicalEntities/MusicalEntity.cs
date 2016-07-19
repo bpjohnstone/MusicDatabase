@@ -8,8 +8,8 @@ namespace MusicDatabase.Model
         public string Name { get; set; }
         public string SortName { get; set; }
 
-        public virtual ICollection<DiscographyEntry> Discography { get; set; }
-        public virtual ICollection<Performance> Performances { get; set; }
+        public ICollection<DiscographyEntry> Discography { get; set; }
+        public ICollection<Performance> Performances { get; set; }
         #endregion
 
         #region Constructors

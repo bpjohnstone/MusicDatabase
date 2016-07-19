@@ -42,7 +42,7 @@ namespace MusicDatabase.Model
         public Guid ID { get; set; }
         public int? Position { get; set; }
 
-        public virtual ICollection<Performer> Performers { get; set; }
+        public ICollection<Performer> Performers { get; set; }
         public string PerformingAs { get; set; }
 
         public virtual MusicalEvent Event { get; set; }

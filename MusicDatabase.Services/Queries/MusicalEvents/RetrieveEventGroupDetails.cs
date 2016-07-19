@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,9 @@ namespace MusicDatabase.Services.Queries.MusicalEvents
 
             if (ID != Guid.Empty)
             {
-                var eventGroup = Context.Set<EventGroup>().Find(ID);
+                var eventGroup = Context.Set<EventGroup>()
+                                        .Include(g => g.MusicalEvents.Select(e => e.Lineup.Select(l => l.Performers.Select(p => p.MusicalEntity))))
+                                        .Single(g => g.ID == ID);
 
                 // If the entity is inactive, and returnIfInactive = false, return nothing
                 if ((!eventGroup.IsActive) && (!ReturnIfInactive))

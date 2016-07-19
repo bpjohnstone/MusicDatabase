@@ -24,7 +24,9 @@ namespace MusicDatabase.Services.Queries.Locations
 
             if (ID != Guid.Empty)
             {
-                var locationGroup = Context.Set<LocationGroup>().Find(ID);
+                var locationGroup = Context.Set<LocationGroup>()
+                                        .Include("Locations")
+                                        .Single(g => g.ID == ID);
 
                 // If the entity is inactive, and returnIfInactive = false, return nothing
                 if ((!locationGroup.IsActive) && (!ReturnIfInactive))

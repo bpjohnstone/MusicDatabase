@@ -14,8 +14,8 @@ namespace MusicDatabase.Model
         public string Notes { get; set; }
         public virtual EventGroup EventGroup { get; set; }
 
-        public virtual ICollection<Performance> Lineup { get; set; }
-        public virtual ICollection<EventAttendee> OtherAttendees { get; set; }
+        public ICollection<Performance> Lineup { get; set; }
+        public ICollection<EventAttendee> OtherAttendees { get; set; }
         #endregion
 
         #region Constructors

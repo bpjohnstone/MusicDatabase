@@ -7,7 +7,7 @@ namespace MusicDatabase.Model
         #region Properties
         public string Name { get; set; }
         public string Address { get; set; }
-        public virtual WebsiteGroup WebsiteGroup { get; set; }
+        public WebsiteGroup WebsiteGroup { get; set; }
         public string Notes { get; set; }
 
         public string SortName
@@ -50,7 +50,7 @@ namespace MusicDatabase.Model
     public class WebsiteGroup : AbstractGroup
     {
         #region Properties
-        public virtual ICollection<Website> Websites { get; set; }
+        public ICollection<Website> Websites { get; set; }
         #endregion
 
         #region Constructors

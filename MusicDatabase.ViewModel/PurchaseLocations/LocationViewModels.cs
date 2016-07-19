@@ -45,7 +45,10 @@ namespace MusicDatabase.ViewModel
 
         [Display(Name="Other Names")]
         public Dictionary<int, string> OtherNames { get; set; }
+
         public List<MusicalEventByLocation> MusicalEvents { get; set; }
+        public List<MusicalEventByLocation> UpcomingMusicalEvents { get; set; }
+
         //public List<CopyDetails> Purchases { get; set; }
 
         public LocationDetails()

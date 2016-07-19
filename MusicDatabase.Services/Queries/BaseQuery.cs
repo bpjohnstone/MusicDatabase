@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MusicDatabase.EntityFramework;
+using MusicDatabase.Model;
 
 namespace MusicDatabase.Services.Queries
 {
-    public class BaseQuery
+    public abstract class BaseQuery
     {
         protected MusicDbContext Context;
         protected IMapper Mapper;

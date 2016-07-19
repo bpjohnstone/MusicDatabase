@@ -7,7 +7,7 @@ namespace MusicDatabase.Model
     public class EventGroup : AbstractGroup
     {
         #region Properties
-        public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }
+        public ICollection<MusicalEvent> MusicalEvents { get; set; }
         #endregion
 
         #region Constructors
@@ -29,7 +29,7 @@ namespace MusicDatabase.Model
     public class MultiDayFestivalGroup : AbstractGroup
     {
         #region Properties
-        public virtual ICollection<MultiDayFestival> Days { get; set; }
+        public ICollection<MultiDayFestival> Days { get; set; }
         #endregion
 
         #region Constructors

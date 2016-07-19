@@ -10,7 +10,7 @@ using System.Configuration;
 
 namespace MusicDatabase.EntityFramework
 {
-    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseAlways<MusicDbContext>
+    public class MusicDbInitialiser : System.Data.Entity.DropCreateDatabaseIfModelChanges<MusicDbContext>
     {
         protected override void Seed(MusicDbContext context)
         {
@@ -47,8 +47,9 @@ namespace MusicDatabase.EntityFramework
                     @"SELECT d.artistID, d.position, r.releaseID, r.name, r.year, 
                         r.releasedby, r.isEP, r.isCompilation, r.isSingle, r.isSoundtrack,
                         r.isLiveAlbum, r.isRemixAlbum
-                    FROM rvwartistdiscography d, rvwrelease r 
-                    WHERE d.releaseID = r.releaseID
+                    FROM rvwartistdiscography d
+                    INNER JOIN rvwrelease r 
+                    ON d.releaseID = r.releaseID
                     ORDER BY d.artistID, d.position", sqlConnect);
                 sqlAdapter = new MySqlDataAdapter(sqlCommand);
                 sqlAdapter.Fill(releaseData);
@@ -905,7 +906,7 @@ namespace MusicDatabase.EntityFramework
                 // Add in the performers
                 foreach (var performerName in performerNames)
                 {
-                    var performer = musicalEntities.First(e => e.Name == performerName);
+                    var performer = musicalEntities.First(e => e.Name.ToLower() == performerName.ToLower());
                     performance.Performers.Add(new Performer(performance.Performers.Count + 1, performer));
                     performer.Performances.Add(performance);
                 }

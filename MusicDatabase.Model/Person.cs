@@ -11,7 +11,7 @@ namespace MusicDatabase.Model
         public string Notes { get; set; }
 
         // Events
-        public virtual ICollection<MusicalEvent> EventsAttended { get; set; }
+        public ICollection<MusicalEvent> EventsAttended { get; set; }
         public int TotalEvents
         {
             get
@@ -21,7 +21,7 @@ namespace MusicDatabase.Model
         }
 
         // Gifts
-        public virtual ICollection<Copy> GiftsGiven { get; set; }
+        public ICollection<Copy> GiftsGiven { get; set; }
         #endregion
 
         #region Constructors

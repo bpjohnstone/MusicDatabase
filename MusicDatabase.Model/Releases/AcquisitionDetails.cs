@@ -45,7 +45,7 @@ namespace MusicDatabase.Model
     public class GiftDetails : AcquisitionDetails
     {
         #region Properties
-        public virtual ICollection<Person> From { get; set; }
+        public ICollection<Person> From { get; set; }
         public string Occasion { get; set; }
         #endregion
 

@@ -43,8 +43,17 @@ namespace MusicDatabase.Services.Queries.People
                     break;
             }
 
-            query.ToList().ForEach(p => result.Add(Mapper.Map<PersonListing>(p)));
+            foreach(var person in query.ToList())
+            {
+                var listing = Mapper.Map<PersonListing>(person);
 
+                var musicalEvents = Context.Entry(person).Collection(l => l.EventsAttended).Query().Where(e => e.EventDate < DateTime.Now);
+                listing.EventsAttended = musicalEvents.Count(e => e is SingleDayEvent) + musicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count();
+                listing.GiftsGiven = Context.Entry(person).Collection(l => l.GiftsGiven).Query().Count();
+
+                result.Add(listing);
+            }
+            
             return result;
         }
     }

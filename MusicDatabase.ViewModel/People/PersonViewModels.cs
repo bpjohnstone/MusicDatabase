@@ -23,6 +23,8 @@ namespace MusicDatabase.ViewModel
     public class PersonDetails : PersonBasic
     {
         public List<MusicalEventListing> EventsAttended { get; set; }
+        public List<MusicalEventListing> UpcomingEvents { get; set; }
+
         // GiftsGiven
     }
 }

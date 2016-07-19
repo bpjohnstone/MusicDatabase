@@ -77,54 +77,16 @@
     </ul>
 }
 
+@if(Model.UpcomingPerformances.Count > 0)
+{
+    <h4>Upcoming Performances</h4>
+    Html.RenderPartial("_MusicalEventsByMusicalEntity", Model.UpcomingPerformances);
+}
+
 @if (Model.Performances.Count > 0)
 {
     <h4>Performances</h4>
-
-    <table class="table">
-        @foreach (var eventListing in Model.Performances.OrderByDescending(p => p.EventDate))
-        {
-            <tr>
-                <td>@Html.ActionLink(eventListing.EventDate.ToString("d MMMM yyyy"), "Details", "MusicalEvents", new { ID = eventListing.ID }, null)</td>
-                <td>
-                    @if (eventListing.VenueID != null)
-                    {
-                        @Html.ActionLink(eventListing.VenueName, "Details", "Locations", new { ID = eventListing.VenueID }, null)
-                        if (!string.IsNullOrWhiteSpace(eventListing.VenueCity))
-                        {
-                            @Html.Raw(", ")
-                            @eventListing.VenueCity
-                        }
-                    }
-                </td>
-                <td>
-                    @if (eventListing.EventGroupID != null)
-                    {
-                        if (eventListing.EventType != EventType.Concert)
-                        {
-                            <text>@eventListing.EventGroupName </text>
-
-                            switch (eventListing.EventType)
-                            {
-                                case EventType.Festival:
-                                    <span style="font-weight: bold; font-size: 10px; color: red;">[Festival]</span>
-                                    break;
-                                case EventType.MultiDayFestival:
-                                    <span style="font-weight: bold; font-size: 10px; color: maroon;">[Multi-Day Festival]</span>
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            <text>(@eventListing.EventGroupName)</text>
-                        }
-                    }
-                                        
-                </td>
-
-            </tr>
-        }
-    </table>
+    Html.RenderPartial("_MusicalEventsByMusicalEntity", Model.Performances);
 }
 
 <p>

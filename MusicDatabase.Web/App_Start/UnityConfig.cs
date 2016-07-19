@@ -57,15 +57,18 @@ namespace MusicDatabase.Web.App_Start
                     .ForMember(dest => dest.EventsAttended, opts => opts.MapFrom(
                         src => src.EventsAttended.Count(e => e is SingleDayEvent) + src.EventsAttended.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count()))
                     .ForMember(dest => dest.GiftsGiven, opts => opts.MapFrom(src => src.GiftsGiven.Count));
-                cfg.CreateMap<Person, PersonDetails>();
+                cfg.CreateMap<Person, PersonDetails>()
+                    .ForMember(dest => dest.EventsAttended, opts => opts.MapFrom(src => src.EventsAttended.Where(e => e.EventDate < DateTime.Now)))
+                    .ForMember(dest => dest.UpcomingEvents, opts => opts.MapFrom(src => src.EventsAttended.Where(e => e.EventDate >= DateTime.Now)));
 
                 // Locations
                 cfg.CreateMap<Location, LocationListing>()
-                    .ForMember(dest => dest.MusicalEvents, opts => opts.MapFrom(
-                        src => src.MusicalEvents.Count(e => e is SingleDayEvent) + src.MusicalEvents.OfType<MultiDayFestival>().Select(e => e.FestivalGroup).Distinct().Count()))
-                    .ForMember(dest => dest.Purchases, opts => opts.MapFrom(src => src.Purchases.Count));
+                    .ForMember(dest => dest.MusicalEvents, opts => opts.Ignore())
+                    .ForMember(dest => dest.Purchases, opts => opts.Ignore());
                 cfg.CreateMap<Location, LocationDetails>()
                     .ForMember(dest => dest.OtherNames, opts => opts.Ignore())
+                    .ForMember(dest => dest.MusicalEvents, opts => opts.MapFrom(src => src.MusicalEvents.Where(e => e.EventDate < DateTime.Now)))
+                    .ForMember(dest => dest.UpcomingMusicalEvents, opts => opts.MapFrom(src => src.MusicalEvents.Where(e => e.EventDate >= DateTime.Now)))
                     .AfterMap((src, dest) =>
                     {
                         foreach (var name in src.OtherNames)
@@ -82,7 +85,9 @@ namespace MusicDatabase.Web.App_Start
                     .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Count))
                     .ForMember(dest => dest.Releases, opts => opts.MapFrom(src => src.Discography.Count));
 
-                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>();
+                cfg.CreateMap<MusicalEntity, MusicalEntityDetails>()
+                    .ForMember(dest => dest.UpcomingPerformances, opts => opts.MapFrom(src => src.Performances.Where(e => e.Event.EventDate >= DateTime.Now)))
+                    .ForMember(dest => dest.Performances, opts => opts.MapFrom(src => src.Performances.Where(e => e.Event.EventDate < DateTime.Now)));
 
                 // Releases
                 cfg.CreateMap<DiscographyEntry, KeyValuePair<int, ReleaseListing>>()

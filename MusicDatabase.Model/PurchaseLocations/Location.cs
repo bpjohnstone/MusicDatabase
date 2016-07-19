@@ -32,7 +32,7 @@ namespace MusicDatabase.Model
 
         public string Notes { get; set; }
 
-        public virtual ICollection<MusicalEvent> MusicalEvents { get; set; }    // Collection of Concerts / Festivals
+        public ICollection<MusicalEvent> MusicalEvents { get; set; }    // Collection of Concerts / Festivals
         public int TotalEvents
         {
             get
@@ -41,7 +41,7 @@ namespace MusicDatabase.Model
             }
         }
 
-        public virtual ICollection<Copy> Purchases { get; set; }                // Collection of Purchases
+        public ICollection<Copy> Purchases { get; set; }                // Collection of Purchases
         
         public bool IsClosed { get; set; }
         #endregion
@@ -100,7 +100,7 @@ namespace MusicDatabase.Model
     public class LocationGroup : AbstractGroup
     {
         #region Properties
-        public virtual ICollection<Location> Locations { get; set; }
+        public ICollection<Location> Locations { get; set; }
 
         // A group of locations can have a website (i.e. JB Hifi or Red Eye Records)
         public virtual Website Website { get; set; }
